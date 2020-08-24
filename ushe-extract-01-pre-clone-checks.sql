@@ -354,6 +354,7 @@
                  OR (spbpers_citz_code = '2' AND gorvisa_vtyp_code IS NULL)
                  OR (spbpers_citz_code NOT IN ('2', '3') AND gorvisa_vtyp_code IS NOT NULL)
                  OR (spbpers_citz_code = '2' AND gorvisa_vtyp_code IS NULL))
+             AND gorvisa_visa_expire_date IS NULL
             );
 
     --  result(s)
