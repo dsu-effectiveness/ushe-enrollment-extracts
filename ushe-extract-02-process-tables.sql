@@ -1,4 +1,4 @@
-/* 
+/*
 --DROP   TABLE extract_parameters;
   CREATE TABLE extract_parameters
   (
@@ -13,11 +13,14 @@
   INSERT INTO extract_parameters VALUES ('20203E','202030','2021','2021','1','E');
 */
 
+
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
 
+
  TRUNCATE TABLE students_current;
+ ALTER TABLE ENROLL.STUDENTS_CURRENT MODIFY(S_HB75_WAIVER NUMBER(9));
  INSERT INTO students_current
  SELECT      DISTINCT
              s_pidm,
@@ -253,7 +256,7 @@
                    spbpers,
                    sfrstcr,
                    stvrsts
-            WHERE  p_dsc_term_code        = '20203E'      -- This is the only variable one need supply
+            WHERE  p_dsc_term_code        = '20202E'      -- This is the only variable one need supply
             AND    sfrstcr_pidm           = spriden_pidm  -- Join PIDMs
             AND    spbpers_pidm           = sfrstcr_pidm  -- Join PIDMs
             AND    sfrstcr_term_code      = p_banner_term -- Join Term Codes
@@ -343,12 +346,13 @@
                  ) AS s_entry_action, 
                  -------------------------
                  stdn.s_styp,
-                 CASE WHEN majr.s_cur_degc1 LIKE 'N%' THEN '0' -- * Degree Intent '1' is not applicable; the registrar
-                   -- WHEN majr.s_cur_degc1 LIKE 'C%' THEN '1' --   no longer allows students to declare certificate
-                      WHEN majr.s_cur_degc1 LIKE 'A%' THEN '2' --   as their intented program. 
-                      WHEN majr.s_cur_degc1 LIKE 'B%' THEN '4' -- * Degree Intent 'A' is not applicable as students 
-                      WHEN majr.s_cur_degc1 LIKE 'M%' THEN 'M' --   cannot declare master's degree before having  
-                      ELSE 'E' END AS s_deg_intent,            --   completed their bachelor's degree requirements. 
+                 CASE WHEN majr.s_cur_degc1 LIKE 'N%' THEN '0' 
+                      WHEN stdn.s_styp         = 'P'  THEN '0' 
+                      WHEN majr.s_cur_degc1 LIKE 'C%' THEN '1'  
+                      WHEN majr.s_cur_degc1 LIKE 'A%' THEN '2'
+                      WHEN majr.s_cur_degc1 LIKE 'B%' THEN '4' 
+                      WHEN majr.s_cur_degc1 LIKE 'M%' THEN 'M' 
+                      ELSE 'E' END AS s_deg_intent,
                  majr.s_cur_prgm1,
                  majr.s_cur_prgm2,
                  majr.s_cur_degc1,
@@ -577,35 +581,31 @@
                  ) adid,
                  ( 
                    SELECT rpratrm_pidm AS inner_pidm,
-                          round(sum(rpratrm_paid_amt) / max(hb75_minus), 2) * 100 AS s_hb75_waiver                       
-                   FROM   students, rpratrm, 
-                          ( SELECT (
-                                     SELECT max(sfrrgfe_min_charge)
-                                     FROM   sfrrgfe
-                                     WHERE  sfrrgfe_term_code     = '201840'
-                                     AND    sfrrgfe_from_flat_hrs = 12
-                                     AND    sfrrgfe_resd_code     = 'N'
-                                     AND    sfrrgfe_detl_code    IN ('1200','1201')
-                                     AND    sfrrgfe_program      IS NULL
-                                     AND    sfrrgfe_rate_code    IS NULL
-                                     AND    sfrrgfe_camp_code    IS NULL
-                                   )-(
-                                     SELECT max(sfrrgfe_min_charge)
-                                     FROM   sfrrgfe
-                                     WHERE  sfrrgfe_term_code     = '201840'
-                                     AND    sfrrgfe_from_flat_hrs = 12
-                                     AND    sfrrgfe_resd_code     = 'R'
-                                     AND    sfrrgfe_detl_code    IN ('1001','1002')
-                                     AND    sfrrgfe_program      IS NULL
-                                     AND    sfrrgfe_rate_code    IS NULL
-                                   ) AS hb75_minus
-                            FROM   dual
-                          )
-                   WHERE  s_pidm = rpratrm_pidm (+)
-                   AND    rpratrm_term_code = s_banner_term
-                   AND    rpratrm_fund_code IN ('82010','82011','82012','82013','82016','82017')
-                   AND    rpratrm_paid_amt > 0
-                   GROUP  BY rpratrm_pidm
+                          round(sum(rpratrm_paid_amt) / max(hb75_minus), 2) * -100 AS s_hb75_waiver 
+                     FROM rpratrm, students,
+                          (SELECT  SUM((SELECT MAX (sfrrgfe_per_cred_charge)
+                             FROM sfrrgfe
+                            WHERE sfrrgfe_term_code = '202020'
+                              AND sfrrgfe_from_flat_hrs = 12
+                              AND sfrrgfe_resd_code = 'R'
+                              AND sfrrgfe_detl_code IN ('1001', '1002')
+                              AND sfrrgfe_program IS NULL
+                              AND sfrrgfe_rate_code IS NULL)
+                - (SELECT MAX (sfrrgfe_per_cred_charge)
+                         FROM sfrrgfe
+                        WHERE sfrrgfe_term_code = '202020'
+                          AND sfrrgfe_from_flat_hrs = 12
+                          AND sfrrgfe_resd_code = 'N'
+                          AND sfrrgfe_detl_code IN ('1200', '1201')
+                          AND sfrrgfe_program IS NULL
+                          AND sfrrgfe_rate_code IS NULL
+                          AND sfrrgfe_camp_code IS NULL))*12  AS hb75_minus
+                    FROM DUAL)
+                   WHERE s_pidm = rpratrm_pidm (+)
+                     AND rpratrm_term_code = s_banner_term  
+                     AND rpratrm_fund_code IN ('82010','82011','82012','82013','82016','82017')
+                     AND rpratrm_paid_amt > 0
+                GROUP BY rpratrm_pidm
                  ) atrm,
                  (
                    SELECT shrlgpa_pidm                AS inner_pidm,
@@ -700,11 +700,11 @@
                                THEN prgm2.prgm_code 
                                END        AS s_cur_prgm2,
                           prgm1.degc_code AS s_cur_degc1,
-                          CASE WHEN prgm1.degc_code <> prgm2.degc_code 
+                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code 
                                THEN prgm2.degc_code
                                END        AS s_cur_degc2,
                           majr1.majr_code AS s_cur_majr1,
-                          CASE WHEN majr1.majr_code <> majr2.majr_code 
+                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code 
                                THEN majr2.majr_code 
                                END        AS s_cur_majr2,
                           nvl(prgm1.cur_cip1,'999999')
@@ -1089,7 +1089,10 @@
                             FROM   gorvisa g2
                             WHERE  g2.gorvisa_pidm = g1.gorvisa_pidm
                           )
+                    AND (gorvisa_visa_expire_date > sysdate OR gorvisa_visa_expire_date IS NULL)
                  ) visa
+
+
                  -------------------------------------
           WHERE  students.s_pidm = addr.inner_pidm (+)
           AND    students.s_pidm = adid.inner_pidm (+)
@@ -1215,13 +1218,14 @@
                         THEN 'N'               -- ... Then Indicate it's a non-credit course
                         ELSE 'C'               -- ... Else Indicate it's a credit course
                         END          AS c_credit_ind                  
+        -- SELECT * 
            FROM   extract_parameters, 
                   as_catalog_schedule,
                   ssbsect,
                   gtvinsm,
                   spriden,
                   ssrsccd
-           WHERE  p_dsc_term_code       = '20203E'              -- This is the only variable one need supply
+           WHERE  p_dsc_term_code       = '20202E'              -- This is the only variable one need supply
            AND    term_code_key         = p_banner_term         -- Join Term Codes
            AND    primary_instructor_id = spriden_id (+)        -- Join Term Codes (LEFT JOIN)
            AND    ssbsect_term_code     = ssrsccd_term_code (+) -- Join Term Codes
@@ -1480,7 +1484,8 @@
                           CASE WHEN c_delivery_method = 'I'    THEN 'O01'
                                WHEN camp_code IN ('AC1','AU1') THEN 'A01'
                                WHEN camp_code IN ('B8C','B8U') THEN 'B80'
-                               WHEN camp_code IN ('OU1','UOS') THEN 'O01'
+                               WHEN camp_code IN ('UOS')       THEN 'C'             -- change made 2/14/19
+                               WHEN camp_code IN ('OU1')       THEN 'O01'
                                ELSE camp_code END              AS c_site_type                               
                    FROM   courses,
                           as_catalog_schedule
@@ -1728,7 +1733,31 @@
          );         
 
  COMMIT; 
--- 
+
+
+-----
+--One-time fixes to be ran for Spring TW 2020
+/*
+update students_current set s_curr_cip1 = '512201' where s_pidm in ('281926', '256618', '308264');
+update students_current set s_curr_cip1 = '540101' where s_pidm in ('255591', '277557', '91107432');
+update students_current set s_curr_cip1 = '430104' where s_pidm in ('138345');
+update students_current set s_curr_cip1 = '500701' where s_pidm in ('280514', '275164', '233207');
+
+update students_current set s_curr_cip_ushe = '512201' where s_pidm in ('281926', '256618', '308264');
+update students_current set s_curr_cip_ushe = '540101' where s_pidm in ('255591', '277557', '91107432');
+update students_current set s_curr_cip_ushe = '430104' where s_pidm in ('138345');
+update students_current set s_curr_cip_ushe = '500701' where s_pidm in ('280514', '275164', '233207');
+
+update students_current set s_entry_action = 'HS' where s_pidm = '291280';
+update students_current set s_entry_action = 'FF' where s_banner_id = '00234325';
+update students_current set s_entry_action = 'FH' where s_banner_id = '00432821';
+
+COMMIT; 
+
+*/
+
+-----
+ 
 -- select distinct c_program_type from courses@dscir where c_crs_subject = 'CED'
 -- select * from dsc.dsc_swvgrde where swvgrde_term_code = 201840 select * from student_courses@dscir where sc_Crs_Sbj = 'CED'
 -- select * from courses_current where c_crs_subject = 'MATH' AND c_crs_number = '1050'
@@ -1744,7 +1773,9 @@
 /*  
 select * from students_current where s_deg_intent != '0' and s_entry_action in ('NM','HS');
 select * from students_current where s_deg_intent = '0' and s_entry_action not in ('NM','HS');
+select * from students_current where s_deg_intent != '0' and s_cur_cip1 = '999999'
 select * from student_courses 
+select * from courses_current 
    SELECT * FROM students_current;
    SELECT * FROM courses_current;
    SELECT * FROM student_courses_current;

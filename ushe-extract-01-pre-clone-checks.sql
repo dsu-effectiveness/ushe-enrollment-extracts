@@ -751,10 +751,9 @@
  /* Tab/Num: [ Student Type ][ 3 ]
   * Action:  Send results to Julie Stender   
   * Notes:   This query is used to help determine if a student should or should not be be considered 
-             a new student. 
-  */ 
+             a new student.  Students Marked RS/CS, but hasn't attended DSU since HS
+  */
 
-    -- Students Marked RS/CS, but hasn't attended DSU since HS
     SELECT COUNT(DISTINCT(pidm)) AS stu_type_table_3_errors
  -- SELECT DISTINCT * 
     FROM   (
@@ -823,8 +822,6 @@
   *          if soactrm not run yet then R will be converted to C if last term here.
   */ 
   
-  -- NEEDS PARTITIONING TO REMOVE DUPLICATES
-
     SELECT COUNT(pidm) AS stu_type_table_5_errors
  -- SELECT DISTINCT *   
     FROM   (
@@ -1280,8 +1277,6 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              OR (ssbsect_camp_code IN ('O01', 'UOS') AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code != 'I' )
        ));
 
-SELECT *
-FROM STVCAMP;
  ---------------------------------------------------------------------------------------------------
  /* Tab/Num:  [ Classes ] [ 7 ]
   * Action:   Send results to Sharon Lee
