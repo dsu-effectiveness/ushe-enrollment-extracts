@@ -1486,11 +1486,10 @@
                           coll_code                            AS c_college,
                           dept_code                            AS c_dept,
                           levl_code1                           AS c_crs_level,
-                          CASE WHEN c_delivery_method = 'I'    THEN 'O01'
-                               WHEN camp_code IN ('AC1','AU1') THEN 'A01'
-                               WHEN camp_code IN ('B8C','B8U') THEN 'B80'
-                               WHEN camp_code IN ('UOS')       THEN 'C'             -- change made 2/14/19
-                               WHEN camp_code IN ('OU1')       THEN 'O01'
+                          CASE WHEN camp_code IN ('AC1','AU1') THEN 'A01'
+                               WHEN camp_code = 'B8C'          THEN 'B80'
+                               WHEN camp_code = 'UOS'          THEN 'C'
+                               WHEN camp_code = 'OU1'          THEN 'O01'
                                ELSE camp_code END              AS c_site_type                               
                    FROM   courses,
                           as_catalog_schedule
