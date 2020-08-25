@@ -331,7 +331,7 @@
                  cur_prgm AS curr_prgm,
                  spbpers_citz_code AS citz_code,
                  gorvisa_vtyp_code AS visa_type,
-                 spbpers_ethn_cde AS ethnic_code,
+                 gorvisa_visa_expire_date AS visa_expire_date,
                  'CITZ 2 Non-Resident Alien without Visa Type' AS reason
             FROM sgbstdn a,
                  spbpers,
@@ -354,8 +354,9 @@
                  OR (spbpers_citz_code = '2' AND gorvisa_vtyp_code IS NULL)
                  OR (spbpers_citz_code NOT IN ('2', '3') AND gorvisa_vtyp_code IS NOT NULL)
                  OR (spbpers_citz_code = '2' AND gorvisa_vtyp_code IS NULL))
-             AND gorvisa_visa_expire_date IS NULL
+             AND (gorvisa_visa_expire_date > sysdate OR gorvisa_visa_expire_date IS NULL)
             );
+
 
     --  result(s)
    
