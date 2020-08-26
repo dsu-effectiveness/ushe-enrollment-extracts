@@ -1,19 +1,21 @@
     
     /* --- RUN IN PROD ----------------------------------------------------------------------------------------------------- */
-    DROP TABLE students_20193E;
-    DROP TABLE course_20193E;
-    DROP TABLE student_course_20193E;
+    DROP TABLE students_20202E;
+    DROP TABLE course_20202E;
+    DROP TABLE student_course_20202E;
     
-    CREATE TABLE students_20193E       AS SELECT * FROM students_201943;
-    CREATE TABLE course_20193E         AS SELECT * FROM course_201943;
-    CREATE TABLE student_course_20193E AS SELECT * FROM student_course_201943;
+    CREATE TABLE students_20202E       AS SELECT * FROM students_20192e;
+    CREATE TABLE course_20202E         AS SELECT * FROM course_20192e;
+    CREATE TABLE student_course_20202E AS SELECT * FROM student_course_20192e;
+    ALTER TABLE course_20202E MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
 
-    TRUNCATE TABLE students_20193E;
-    TRUNCATE TABLE course_20193E;
-    TRUNCATE TABLE student_course_20193E;
+    TRUNCATE TABLE students_20202E;
+    TRUNCATE TABLE course_20202E;
+    TRUNCATE TABLE student_course_20202E;
 
-    /* --- RUN IN IR2 ------------------------------------------------------------------------------------------------------ */
-    INSERT INTO students_20193E@prod
+    /* --- RUN IN IR1 or IR2 ------------------------------------------------------------------------------------------------------ */
+
+    INSERT INTO students_20202E@proddb.dixie.edu
     SELECT s_pidm AS pidm,
            s_banner_id,
            s_banner_term AS TERM,
@@ -108,8 +110,9 @@
            s_sport AS sport,
            s_ada AS ada
     FROM   students_current;
+    COMMIT;
     
-    INSERT INTO course_20193E@prod
+    INSERT INTO course_20202E@proddb.dixie.edu
     SELECT c_crn AS crn,
            c_banner_term AS TERM,
            c_inst,
@@ -186,8 +189,9 @@
            c_room_max3,
            c_room_type3
     FROM   courses_current;
+    COMMIT;
     
-    INSERT INTO student_course_20193E@prod
+    INSERT INTO student_course_20202E@proddb.dixie.edu
     SELECT sc_pidm AS pidm,
            sc_id AS ID,
            sc_banner_term AS TERM,
@@ -209,6 +213,7 @@
            dsc_loc_recvd,
            gmod
     FROM   student_courses_current;
+    COMMIT;
     
     /*
     SELECT s_gender,                   COUNT(*) AS students FROM students_current                      GROUP BY s_gender       ORDER BY s_gender;
@@ -218,4 +223,8 @@
     SELECT s_pt_ft,                    COUNT(*) AS students FROM students_current                      GROUP BY s_pt_ft        ORDER BY s_pt_ft;
     SELECT s_cur_prgm1, s_major_desc1, COUNT(*) AS students FROM students_current WHERE s_level = 'GG' GROUP BY s_cur_prgm1, s_major_desc1 ORDER BY s_cur_prgm1;
     */
+    
+--    select * from students_20202E
+--    select * from course_20202E
+--    select * from student_course_20202E
     

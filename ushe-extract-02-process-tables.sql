@@ -13,6 +13,8 @@
   INSERT INTO extract_parameters VALUES ('20203E','202030','2021','2021','1','E');
 */
 
+select *
+   from extract_parameters;
 
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
@@ -20,7 +22,7 @@
 
 
  TRUNCATE TABLE students_current;
- ALTER TABLE ENROLL.STUDENTS_CURRENT MODIFY(S_HB75_WAIVER NUMBER(9));
+
  INSERT INTO students_current
  SELECT      DISTINCT
              s_pidm,
@@ -117,13 +119,13 @@
  FROM   ( /**/
           WITH students AS
           (
-            SELECT DISTINCT 
-                   p_dsc_term_code                 AS s_banner_extract,
-                   p_banner_term                   AS s_banner_term,
-                   p_acyr                          AS s_acyr,
-                   p_year                          AS s_year,
-                   p_term                          AS s_term,
-                   p_extract                       AS s_extract,
+            SELECT DISTINCT
+                   (SELECT DISTINCT p_dsc_term_code FROM extract_parameters)                       AS s_banner_extract,
+                   (SELECT DISTINCT p_banner_term FROM extract_parameters)                       AS s_banner_term,
+                   (SELECT DISTINCT p_acyr FROM extract_parameters)                       AS s_acyr,
+                   (SELECT DISTINCT p_year FROM extract_parameters)                       AS s_year,
+                   (SELECT DISTINCT p_term FROM extract_parameters)                       AS s_term,
+                   (SELECT DISTINCT p_extract FROM extract_parameters)                       AS s_extract,
                    spriden_pidm                    AS s_pidm,
                    spriden_id                      AS s_banner_id,
                    substr(spriden_last_name ,1,60) AS s_last_name,
@@ -131,8 +133,8 @@
                    substr(spriden_mi,        1,15) AS s_middle_name,
 
 
---                    CASE WHEN p_extract = '3' THEN 0 ELSE 1 END
---                                                    AS s_xtrct_mltplr, -- Zeros data points during 3rd week
+                   CASE WHEN (SELECT DISTINCT p_extract FROM extract_parameters) = '3' THEN 0 ELSE 1 END
+                                                   AS s_xtrct_mltplr, -- Zeros data points during 3rd week
 --                    CASE WHEN spriden_pidm IN
 --                              ( -- If student has a citz_ind of 2 and resd_code of C
 --                                SELECT s1.sgbstdn_pidm
@@ -255,16 +257,13 @@
                                           )
                                 )                                            
                         ))) AS spraddr_rowid
-            FROM   extract_parameters,
-                   spriden,
-                   spbpers,
-                   sfrstcr,
-                   stvrsts
-            LEFT JOIN rcrapp1 on rcapp1_pidm = spriden_pidm and rcrapp1_aidy_code = p_acyr
-            WHERE  p_dsc_term_code        = '20202E'      -- This is the only variable one need supply
-            AND    sfrstcr_pidm           = spriden_pidm  -- Join PIDMs
-            AND    spbpers_pidm           = sfrstcr_pidm  -- Join PIDMs
-            AND    sfrstcr_term_code      = p_banner_term -- Join Term Codes
+
+            FROM   spriden a
+            INNER JOIN sfrstcr b ON b.sfrstcr_pidm = a.spriden_pidm
+            INNER JOIN spbpers c ON c.spbpers_pidm = b.sfrstcr_pidm
+            LEFT JOIN stvrsts d ON d.stvrsts_code = b.sfrstcr_rsts_code
+            LEFT JOIN rcrapp1 e ON e.rcrapp1_pidm = a.spriden_pidm
+            WHERE  sfrstcr_term_code      = (SELECT DISTINCT p_banner_term FROM extract_parameters) -- Join Term Codes
             AND    sfrstcr_rsts_code      = stvrsts_code  -- Valid Registrations
             AND    spriden_entity_ind     = 'P'           -- Valid Students
             AND    stvrsts_incl_sect_enrl = 'Y'           -- Valid Enrollments
@@ -274,7 +273,7 @@
                      SELECT upper(title)
                      FROM   as_catalog_schedule
                      WHERE  sfrstcr_crn = crn_key 
-                     AND    term_code_key = p_banner_term
+                     AND    term_code_key = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                      AND    ssts_code = 'A'
                    ) NOT LIKE '%LITERACY EXAM%'      
           ) /**/
@@ -1128,6 +1127,7 @@
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------       
 
+
  TRUNCATE TABLE courses_current;       
  INSERT INTO courses_current
  SELECT      c_crn,
@@ -1230,7 +1230,7 @@
                   gtvinsm,
                   spriden,
                   ssrsccd
-           WHERE  p_dsc_term_code       = '20202E'              -- This is the only variable one need supply
+           WHERE  p_dsc_term_code       = (SELECT DISTINCT p_dsc_term_code FROM extract_parameters)              -- This is the only variable one need supply
            AND    term_code_key         = p_banner_term         -- Join Term Codes
            AND    primary_instructor_id = spriden_id (+)        -- Join Term Codes (LEFT JOIN)
            AND    ssbsect_term_code     = ssrsccd_term_code (+) -- Join Term Codes
@@ -1307,26 +1307,16 @@
                  CASE WHEN courses.c_delivery_method = 'E' THEN 'E' END AS c_del_model, 
                  gned.c_gen_ed,
                  ascs.c_site_type,
-                 CASE WHEN c_title LIKE '%Internship%' 
-                       AND dsc_schd_code IN ('PRA','INT')
+                 CASE WHEN dsc_schd_code IN ('PRA','INT', 'CLN','OTH','SUP')
                            THEN 'SUP'
-                      WHEN c_title LIKE '%Capstone%' 
-                       AND dsc_schd_code = 'LEC' 
-                       AND c_bldg1 IS NULL 
-                       AND c_room1 IS NULL
+                      WHEN dsc_schd_code IN ('ACT','MUM','MUN','INV')
                            THEN 'INV'
-                      WHEN c_crs_subject = 'ART' 
-                       AND dsc_schd_code = 'OTH'
-                       AND c_crs_number LIKE '2910%' 
+                      WHEN dsc_schd_code IN ('LEC', 'LEX')
                            THEN 'LEC'
-                      WHEN dsc_schd_code IN ('LEJ','LES','LEV','LEX')
-                           THEN 'LEC'
-                      WHEN dsc_schd_code IN ('LBC','LAS','LAV','LBJ','LBS','LBV','LBX','STU')
+                      WHEN dsc_schd_code IN ('LEL','ENS','STU')
+                           THEN 'LEL'
+                      WHEN dsc_schd_code IN ('LBC','LAB')
                            THEN 'LAB'
-                      WHEN dsc_schd_code IN ('INS','INC','INT','MUM','MUN','ACT','ENS')
-                           THEN 'INV'
-                      WHEN dsc_schd_code IN ('CLN','PRA','CLV','CLS')
-                           THEN 'SUP'
                       ELSE dsc_schd_code
                       END AS c_instruct_type,
                  ascs.c_crs_level,
@@ -1496,6 +1486,7 @@
                    WHERE  crn_key = c_crn
                    AND    term_code_key = c_banner_term 
                  ) ascs,
+
                  (  -- Calculated using SFRSTCR and STVRSTS
                    SELECT sfrstcr_crn AS inner_crn,
                           count(DISTINCT sfrstcr_pidm) AS c_enrl
@@ -1736,59 +1727,4 @@
            AND    sc_crn  = grde.inner_crn  (+)
          );         
 
- COMMIT; 
-
-
------
---One-time fixes to be ran for Spring TW 2020
-/*
-update students_current set s_curr_cip1 = '512201' where s_pidm in ('281926', '256618', '308264');
-update students_current set s_curr_cip1 = '540101' where s_pidm in ('255591', '277557', '91107432');
-update students_current set s_curr_cip1 = '430104' where s_pidm in ('138345');
-update students_current set s_curr_cip1 = '500701' where s_pidm in ('280514', '275164', '233207');
-
-update students_current set s_curr_cip_ushe = '512201' where s_pidm in ('281926', '256618', '308264');
-update students_current set s_curr_cip_ushe = '540101' where s_pidm in ('255591', '277557', '91107432');
-update students_current set s_curr_cip_ushe = '430104' where s_pidm in ('138345');
-update students_current set s_curr_cip_ushe = '500701' where s_pidm in ('280514', '275164', '233207');
-
-update students_current set s_entry_action = 'HS' where s_pidm = '291280';
-update students_current set s_entry_action = 'FF' where s_banner_id = '00234325';
-update students_current set s_entry_action = 'FH' where s_banner_id = '00432821';
-
-COMMIT; 
-
-*/
-
------
- 
--- select distinct c_program_type from courses@dscir where c_crs_subject = 'CED'
--- select * from dsc.dsc_swvgrde where swvgrde_term_code = 201840 select * from student_courses@dscir where sc_Crs_Sbj = 'CED'
--- select * from courses_current where c_crs_subject = 'MATH' AND c_crs_number = '1050'
- ------------------------------------------------------------------------------------------------------------
- ------------------------------------------------------------------------------------------------------------
- ------------------------------------------------------------------------------------------------------------
---143720
-  -- count non-credit students.
-  -- growth in 2nd block?
-  -- compare withdrawl rate. 
---SELECT * FROM students_current WHERE s_pidm NOT IN (SELECT pidm FROM students_201823)
---select * from students_20174E where pidm not in (select pidm from students_201743)
-/*  
-select * from students_current where s_deg_intent != '0' and s_entry_action in ('NM','HS');
-select * from students_current where s_deg_intent = '0' and s_entry_action not in ('NM','HS');
-select * from students_current where s_deg_intent != '0' and s_cur_cip1 = '999999'
-select * from student_courses 
-select * from courses_current 
-   SELECT * FROM students_current;
-   SELECT * FROM courses_current;
-   SELECT * FROM student_courses_current;
-   SELECT * FROM students_201823;
-   SELECT * FROM as_catalog_schedule WHERE crn_key = '22279' AND term_code_key = '201820'
-   SELECT * FROM sfrstcr WHERE sfrstcr_pidm = 158905 AND sfrstcr_term_code = '201820'
-   SELECT * FROM spraddr WHERE spraddr.rowid = baninst1.f_get_address_rowid('187866','STDNADDR','A',SYSDATE,NULL,'S',NULL)
-   SELECT * FROM sabsupl WHERE sabsupl_pidm = '187866'
-   SELECT * FROM sorhsch WHERE sorhsch_pidm = '254790'
-   select * from stvterm where stvterm_code in ('201730','201740','201820')
-   select * from dsc_programs_current
-*/
+ COMMIT;
