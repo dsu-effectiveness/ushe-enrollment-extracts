@@ -496,6 +496,32 @@
            )
     ORDER  BY stu_ssn, full_name;
     --  result(s)
+
+     ---------------------------------------------------------------------------------------------------
+ /* Tab/Num: [ Demographics] [ 7 ]
+  * Action:  Send results to Julie Stender
+  * Notes:   This query identifies null citizenship codes in SPBPERS
+  */
+
+  SELECT count(DISTINCT(pidm)) AS demographics_table_7_errors
+ -- SELECT DISTINCT *
+    FROM (SELECT spbpers_pidm AS pidm,
+                 spriden_id AS banner_id, f_format_name(spriden_pidm,'LFMI') AS full_name,
+                 spbpers_citz_code AS citz_code,
+                 'Null citizenship code found' AS reason
+            FROM spriden a
+                 INNER JOIN sfrstcr b
+                            ON b.sfrstcr_pidm = a.spriden_pidm
+                 INNER JOIN spbpers c
+                            ON c.spbpers_pidm = b.sfrstcr_pidm
+                 LEFT JOIN stvrsts d
+                           ON d.stvrsts_code = b.sfrstcr_rsts_code
+           WHERE sfrstcr_term_code = '202030'
+             AND spriden_entity_ind = 'P'
+             AND spriden_change_ind IS NULL
+             AND stvrsts_incl_sect_enrl = 'Y'
+             AND sfrstcr_camp_code != 'XXX'
+             AND spbpers_citz_code IS NULL);
  
  ---------------------------------------------------------------------------------------------------
  /* Tab/Num: [ Degrees & Programs ] [ 1 ]
@@ -576,7 +602,7 @@
              WHERE  spriden_pidm = pidm
              AND    spriden_change_ind IS NULL
              AND    reg_type = 'HS' 
-             AND    cur_prgm NOT IN ('ND-CONC','ND-SA','ND-CE')
+             AND    cur_prgm NOT IN ('ND-CONC','ND-SA','ND-CE', 'ND-ACE')
            );
     --  result(s)
     
@@ -886,7 +912,7 @@
              WHERE  styp = 'H'
              AND    spriden_change_ind IS NULL
              AND    spriden_pidm = pidm
-             AND    cur_prgm NOT IN ('CE-CONC','ND-CE','ND-CONC','ND-SA')
+             AND    cur_prgm NOT IN ('CE-CONC','ND-CE','ND-CONC','ND-SA', 'ND-ACE')
            );
     --  result(s)
 
@@ -987,35 +1013,26 @@
                     styp             AS stu_type,
                     hsgraddt         AS hsgrad_dt,
                     cur_prgm         AS curr_prgm,
-                    sum(rprawrd_paid_amt) AS rprawrd_paid,
+                    sum(rpratrm_paid_amt) AS rprawrd_paid,
                     "F/P/N"          AS pt_ft,
                     classcode        AS class_code,
                     stu_age          AS age,
                     reg_type         AS entry_action,
                     'ND/CE applied for FinAid' 
                                      AS reason
-             FROM   faismgr.rprawrd, 
+             FROM   faismgr.rpratrm,
                     enroll.dailystats,
                     spriden
-             WHERE  rprawrd_pidm      = pidm
+             WHERE  rpratrm_pidm      = pidm
              AND    spriden_change_ind IS NULL
              AND    spriden_pidm = pidm
-             AND    rprawrd_aidy_code = '1819' -- <-- AYAY of reporting academic year
-             AND    rprawrd_paid_amt  > 0 
-             AND    rprawrd_pidm IN 
-                    (
-                      SELECT d.pidm
-                      FROM   dailystats d, 
-                             rcrapp4
-                      WHERE  rcrapp4_pidm      = d.pidm
-                      AND    rcrapp4_aidy_code = '1819' -- <-- AYAY of reporting academic year
-                      AND    rcrapp4_infc_code = 'EDE'
-                      AND    d.styp IN ('H','P')
-                    )
+             AND    rpratrm_period = '202030' -- <-- AYAY of reporting academic year
+             AND    rpratrm_paid_amt  > 0
+             AND    styp IN ('H','P')
              GROUP  BY pidm, id, spriden_pidm, styp, hsgraddt, cur_prgm, "F/P/N", classcode, stu_age, reg_type
            );
     --  result(s)
-    
+
  ---------------------------------------------------------------------------------------------------
  /* Tab/Num: [ Student Type ][ 10 ]
   * Action:  Send results to Julie Stender   
