@@ -258,7 +258,7 @@
                     s1.sabsupl_natn_code_admit    AS admit_country, 
                     s1.sabsupl_term_code_entry    AS ea_term_code, 
                     s1.sabsupl_appl_no            AS appl_num,
-                    'US Citizen, missing County'  AS reason
+                    'US Citizen, missing County or Country'  AS reason
              FROM   sabsupl s1, 
                     spriden,
                     dailystats
@@ -289,7 +289,7 @@
                     s1.sabsupl_natn_code_admit   AS admit_country, 
                     s1.sabsupl_term_code_entry   AS ea_term_code, 
                     s1.sabsupl_appl_no           AS appl_num,
-                    'US Citizen, missing County' AS reason
+                    'US Citizen, missing County or Country'  AS reason
              FROM   sabsupl s1, 
                     spriden,
                     dailystats
@@ -1300,7 +1300,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
  /* Tab/Num:  [ Classes ] [ 7 ]
   * Action:   Send results to Sharon Lee
   * Notes:    
-  */ /*
+  */
 
     SELECT COUNT(*) AS classes_table_7_errors
  -- SELECT DISTINCT *   
@@ -1328,6 +1328,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    ssts_code = 'A' 
              AND    camp_code <> 'XXX'    
              AND    term_code_key = '202040'
+             AND    bldg_code1 NOT IN ('VIRT', 'ONLINE')
              AND    bldg_code1 IS NOT NULL 
              AND    room_code1 IS NULL
            );
