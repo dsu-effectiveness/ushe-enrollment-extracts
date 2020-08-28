@@ -1,13 +1,14 @@
 
  -- File:     pre-enrollment-error-checks.sql
- -- Term:     201933 (2019 Spring 3rd Week)
+ -- Term:     202043 (2020 Fall 3rd Week)
  -- Action:   Update and run all of these queries, add any results to this term's error spreadsheet
  --           in Excel and send them to Julie Stender (Students) and/or Sharon Lee (Classes).
 
  ---------------------------------------------------------------------------------------------------
  --  Begin: DailyStats Table Create -- This table is used for many of the pre-enrollment checks.  -- 
  ---------------------------------------------------------------------------------------------------
- 
+
+
  -- Drop Existing Table
     DROP TABLE dailystats;
 
@@ -32,7 +33,7 @@
       FROM   baninst1.sfvregd,
              saturn.stvrsts,
              dsc.dsc_swvstdn
-      WHERE  sfvregd_term_code      = '202030' -- <-- this reporting term
+      WHERE  sfvregd_term_code      = '202040' -- <-- this reporting term
       AND    sfvregd_pidm           = swvstdn_pidm	
       AND    sfvregd_term_code      = swvstdn_term_code
       AND    sfvregd_rsts_code      = stvrsts_code
@@ -181,7 +182,7 @@
  -- Calculate Entry Action by ----------------------------------------------------------------------
 
     UPDATE enroll.dailystats
-    SET    reg_type = f_calc_entry_action_2(pidm,'202030');
+    SET    reg_type = f_calc_entry_action_2(pidm,'202040');
 
  -- Calculate Age by Today's Date ------------------------------------------------------------------
 
@@ -230,7 +231,7 @@
              AND    spriden_pidm = spbpers_pidm (+)
              AND    sfrstcr_pidm = spriden_pidm
              AND    spriden_pidm = pidm
-             AND    sfrstcr_term_code >= '202030' -- <-- YYYYTT of this reporting term
+             AND    sfrstcr_term_code >= '202040' -- <-- YYYYTT of this reporting term
              AND    sfrstcr_rsts_code = stvrsts_code
              AND    stvrsts_incl_sect_enrl = 'Y'
              AND   (spbpers_sex IS NULL OR spbpers_sex NOT IN ('M','F'))
@@ -268,7 +269,7 @@
                       SELECT MAX(s2.sabsupl_appl_no||s2.sabsupl_term_code_entry) 
                       FROM   sabsupl s2
                       WHERE  s2.sabsupl_pidm = s1.sabsupl_pidm
-                      AND    s2.sabsupl_term_code_entry >= '202030' -- <-- YYYYTT of this reporting term
+                      AND    s2.sabsupl_term_code_entry >= '202040' -- <-- YYYYTT of this reporting term
                       AND    s2.sabsupl_term_code_entry != '999999'
                       GROUP BY sabsupl_pidm
                     ) 
@@ -299,7 +300,7 @@
                       SELECT MAX(s2.sabsupl_appl_no||s2.sabsupl_term_code_entry) 
                       FROM   sabsupl s2
                       WHERE  s2.sabsupl_pidm = s1.sabsupl_pidm
-                      AND    s2.sabsupl_term_code_entry >= '202030' -- <-- YYYYTT of this reporting term
+                      AND    s2.sabsupl_term_code_entry >= '202040' -- <-- YYYYTT of this reporting term
                       AND    s2.sabsupl_term_code_entry != '999999'
                       GROUP BY sabsupl_pidm
                     ) 
@@ -348,7 +349,7 @@
              AND a.sgbstdn_term_code_eff = (SELECT MAX(b.sgbstdn_term_code_eff)
                                               FROM sgbstdn b
                                              WHERE b.sgbstdn_pidm = a.sgbstdn_pidm
-                                               AND b.sgbstdn_term_code_eff <= '202030' -- <-- YYYYTT of this reporting term
+                                               AND b.sgbstdn_term_code_eff <= '202040' -- <-- YYYYTT of this reporting term
            )
              AND ((spbpers_citz_code <> '2' AND gorvisa_vtyp_code IS NOT NULL)
                  OR (spbpers_citz_code = '2' AND gorvisa_vtyp_code IS NULL)
@@ -396,7 +397,7 @@
              AND    sfrstcr_crn  = ssbsect_crn
              AND    sfrstcr_term_code = ssbsect_term_code
              AND    sfrstcr_rsts_code = stvrsts_code
-             AND    sfrstcr_term_code = '202030' -- <-- YYYYTT of this reporting term
+             AND    sfrstcr_term_code = '202040' -- <-- YYYYTT of this reporting term
              AND    stvrsts_incl_sect_enrl = 'Y'
              AND    sorhsch_sbgi_code  IS NULL
              AND    spriden_change_ind IS NULL
@@ -516,7 +517,7 @@
                             ON c.spbpers_pidm = b.sfrstcr_pidm
                  LEFT JOIN stvrsts d
                            ON d.stvrsts_code = b.sfrstcr_rsts_code
-           WHERE sfrstcr_term_code = '202030'
+           WHERE sfrstcr_term_code = '202040'
              AND spriden_entity_ind = 'P'
              AND spriden_change_ind IS NULL
              AND stvrsts_incl_sect_enrl = 'Y'
@@ -560,7 +561,7 @@
                       SELECT MAX(c.sgbstdn_term_code_eff) 
                       FROM   sgbstdn c 
                       WHERE  c.sgbstdn_pidm = pidm 
-                      AND    c.sgbstdn_term_code_eff <= '202030' -- <-- YYYYTT of this reporting term
+                      AND    c.sgbstdn_term_code_eff <= '202040' -- <-- YYYYTT of this reporting term
                     )
              AND    NOT (sgvacur_majr_code_1 = 'RN'   -- Ignore RN   if curr program is BS-NURS-P or AA-ADN
                     AND (cur_prgm = 'BS-NURS-P' OR sgvacur_program = 'AAS-ADN' ))
@@ -646,15 +647,15 @@
                       AND    s_entry_action <> 'HS'
                       AND    stvterm_start_date > hsgraddt
                       AND    stvterm_code > to_char(hsgraddt,'YYYY')||'30'
-                      AND    stvterm_code != '202030'
+                      AND    stvterm_code != '202040'
                       GROUP  BY spriden_pidm, pidm, ID, styp, hsgraddt, cur_prgm, s_term_att_cr
                     ) x 
            )
     WHERE  rn = 1
     AND    CASE WHEN min_term = max_term -- This statement stops first-time attendance during the Summer from affecting Fall
                  AND substr(max_term, -2) = '30' 
-                 AND substr('202030', -2) = '40'
-                 AND substr(max_term,1,4) = substr('202030',1,4)
+                 AND substr('202040', -2) = '40'
+                 AND substr(max_term,1,4) = substr('202040',1,4)
            THEN 0 ELSE 1 END = 1
     ORDER  BY reason, full_name;
     --  results
@@ -878,7 +879,7 @@
                       FROM   (
                                SELECT stvterm_code AS term_code, row_number() OVER (ORDER BY stvterm_code DESC) AS rn
                                FROM   stvterm
-                               WHERE  stvterm_code < '202030'
+                               WHERE  stvterm_code < '202040'
                                AND    substr(stvterm_code, 5, 1) != '3'
                              ) 
                       WHERE  rn <= 2
@@ -1026,7 +1027,7 @@
              WHERE  rpratrm_pidm      = pidm
              AND    spriden_change_ind IS NULL
              AND    spriden_pidm = pidm
-             AND    rpratrm_period = '202030' -- <-- AYAY of reporting academic year
+             AND    rpratrm_period = '202040' -- <-- AYAY of reporting academic year
              AND    rpratrm_paid_amt  > 0
              AND    styp IN ('H','P')
              GROUP  BY pidm, id, spriden_pidm, styp, hsgraddt, cur_prgm, "F/P/N", classcode, stu_age, reg_type
@@ -1057,7 +1058,7 @@
                     spriden
              WHERE  pidm = spriden_pidm
              AND    spriden_change_ind IS NULL
-             AND    stvterm_code = '202030'
+             AND    stvterm_code = '202040'
              AND    hsgraddt < stvterm_start_date
              AND    styp = 'H'
            );
@@ -1085,7 +1086,7 @@
                     'Students still enrolled in cancelled class.' 
                                       AS reason
              FROM   ssbsect
-             WHERE  ssbsect_term_code = '202030' -- <-- YYYYTT of this reporting term
+             WHERE  ssbsect_term_code = '202040' -- <-- YYYYTT of this reporting term
              AND    ssbsect_ssts_code <> 'A'
              AND    ssbsect_enrl > 0
            );
@@ -1113,7 +1114,7 @@
                     as_catalog_schedule
              WHERE  ssbsect_crn = crn_key
              AND    ssbsect_term_code = term_code_key
-             AND    ssbsect_term_code = '202030' -- <-- YYYYTT of this reporting term
+             AND    ssbsect_term_code = '202040' -- <-- YYYYTT of this reporting term
              AND    ssbsect_ssts_code = 'A'
              AND    begin_time1       > '1700'
              AND    ssbsect_seq_numb NOT LIKE '5%' 
@@ -1143,7 +1144,7 @@
                                       AS reason
              FROM   ssbsect,
                     ssrsccd
-             WHERE  ssbsect_term_code = '202030' -- <-- YYYYTT of this reporting term
+             WHERE  ssbsect_term_code = '202040' -- <-- YYYYTT of this reporting term
              AND    ssbsect_ssts_code = 'A'
              AND    ssbsect_term_code = ssrsccd_term_code
              AND    ssbsect_crn       = ssrsccd_crn 
@@ -1178,7 +1179,7 @@
              FROM   saturn.ssrsccd, 
                     saturn.ssbsect
              WHERE  ssrsccd_crn        = ssbsect_crn
-             AND    ssrsccd_term_code  = '202030' -- <-- YYYYTT of this reporting term
+             AND    ssrsccd_term_code  = '202040' -- <-- YYYYTT of this reporting term
              AND    ssrsccd_term_code  = ssbsect_term_code
              AND    ssrsccd_sccd_code NOT IN ('BC','SF')
              AND    (   
@@ -1205,7 +1206,7 @@
              FROM   saturn.ssrsccd, 
                     saturn.ssbsect
              WHERE  ssrsccd_crn        = ssbsect_crn
-             AND    ssrsccd_term_code  = '202030' -- <-- YYYYTT of this reporting term
+             AND    ssrsccd_term_code  = '202040' -- <-- YYYYTT of this reporting term
              AND    ssrsccd_term_code  = ssbsect_term_code
              AND    ssrsccd_sccd_code IN ('BC','SF')
              AND    (   
@@ -1228,7 +1229,7 @@
     SELECT COUNT(*) AS classes_table_6_errors
  -- SELECT DISTINCT *
     FROM   (
-             SELECT '202030'          AS term_code,
+             SELECT '202040'          AS term_code,
                     scbsupp_subj_code AS subj_code, 
                     scbsupp_crse_numb AS crse_num, 
                     scbsupp_occs_code AS occs_code, 
@@ -1283,7 +1284,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              FROM   saturn.ssrsccd,
                     saturn.ssbsect
              WHERE  ssrsccd_crn        = ssbsect_crn
-             AND    ssrsccd_term_code  = '202030' -- <-- YYYYTT of this reporting term
+             AND    ssrsccd_term_code  = '202040' -- <-- YYYYTT of this reporting term
              AND    ssrsccd_term_code  = ssbsect_term_code
              AND    (
                 (ssbsect_camp_code != 'O01' AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code = 'I')
@@ -1326,7 +1327,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    ssbsect_insm_code NOT IN ('I','E')
              AND    ssts_code = 'A' 
              AND    camp_code <> 'XXX'    
-             AND    term_code_key = '202030'
+             AND    term_code_key = '202040'
              AND    bldg_code1 IS NOT NULL 
              AND    room_code1 IS NULL
            );
@@ -1363,7 +1364,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    ssbsect_insm_code NOT IN ('I','E')
              AND    ssts_code = 'A' 
              AND    camp_code <> 'XXX'    
-             AND    term_code_key = '202030'
+             AND    term_code_key = '202040'
              AND    bldg_code1 IS NULL
            );
     --  result(s)
@@ -1406,7 +1407,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     spriden
              WHERE  spriden_pidm = pidm
              AND    spriden_change_ind IS NULL
-             AND    tbraccd_term_code    = '202030' -- <-- YYYYTT of this reporting term
+             AND    tbraccd_term_code    = '202040' -- <-- YYYYTT of this reporting term
              AND    tbraccd_pidm         = pidm
              AND    tbraccd_detail_code IN ('7200', '7006')
              AND    styp                <> 'H'
@@ -1456,11 +1457,11 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                       FROM   "SATURN"."SHRTCKN", dailystats, sorhsch
                       WHERE  shrtckn_pidm = pidm
                       AND    shrtckn_pidm = sorhsch_pidm (+)
-                      AND    shrtckn_term_code < '202030'  -- <-- YYYYTT of this reporting term
+                      AND    shrtckn_term_code < '202040'  -- <-- YYYYTT of this reporting term
                       AND    styp NOT IN  ('C','R','P')
                       AND    shrtckn_subj_code NOT IN ('CED','STIT','ICL','ADE', 'SAB')
                     ) 
-             AND    dsc_term_code = '202030'  -- <-- YYYYTT of this reporting term
+             AND    dsc_term_code = '202040'  -- <-- YYYYTT of this reporting term
              ORDER  BY styp, s_entry_action, hsgraddt, pidm
            );
     --  result(s)
@@ -1489,7 +1490,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                       FROM   students03@dscir
                       WHERE  dsc_pidm = d.pidm
                       AND    s_entry_action <> 'HS'
-                      AND    dsc_term_code < '202030' -- update each term
+                      AND    dsc_term_code < '202040' -- update each term
                     ) AS last_term_dsu,
                     (
                       SELECT sum(shrtrcr_trans_credit_hours) 
@@ -1525,7 +1526,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                       FROM   students03@dscir
                       WHERE  dsc_pidm = d.pidm
                       AND    s_entry_action <> 'HS'
-                      AND    dsc_term_code < '202030' -- update each term
+                      AND    dsc_term_code < '202040' -- update each term
                     ) AS last_term_dsu,
                     (
                       SELECT sum(shrtrcr_trans_credit_hours) 
@@ -1543,11 +1544,11 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    spriden_pidm = d.pidm
            ) x,
            stvterm
-    WHERE  stvterm_code = '202030'
+    WHERE  stvterm_code = '202040'
            -- Exclude Valid Corrections
-    AND    NOT ((stu_type_3rd IN ('N','F') OR ea_3rd IN ('FF','FH','TU')) AND last_term_dsu <   202030       )
-    AND    NOT ((stu_type_eot = 'C'        OR ea_3rd = 'CS'             ) AND last_term_dsu >= (202030 - 100))
-    AND    NOT ((stu_type_eot = 'R'        OR ea_3rd = 'RS'             ) AND last_term_dsu <  (202030 - 100))
+    AND    NOT ((stu_type_3rd IN ('N','F') OR ea_3rd IN ('FF','FH','TU')) AND last_term_dsu <   202040       )
+    AND    NOT ((stu_type_eot = 'C'        OR ea_3rd = 'CS'             ) AND last_term_dsu >= (202040 - 100))
+    AND    NOT ((stu_type_eot = 'R'        OR ea_3rd = 'RS'             ) AND last_term_dsu <  (202040 - 100))
     AND    NOT ((stu_type_3rd = 'H'        OR ea_3rd = 'HS'             ) AND hsgrad_dt <= stvterm_start_date) 
     AND    NOT ((stu_type_3rd = 'H'        OR ea_3rd = 'HS'             ) AND hsgrad_dt >  stvterm_start_date);
     --  result(s)
