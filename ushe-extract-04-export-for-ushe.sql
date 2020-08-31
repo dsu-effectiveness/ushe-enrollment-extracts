@@ -69,7 +69,7 @@
             s_tot_clep,
             s_total_ap,
             s_ssid,
-            s_banner_id,
+            'D' || s_banner_id AS s_banner_id,
             s_act_comp AS s_act,
             CASE WHEN s_cur_cip1 = '999999' 
                  THEN '240102'
