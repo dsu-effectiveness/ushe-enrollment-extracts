@@ -1725,6 +1725,6 @@ select *
                   ) grde
            WHERE  sc_pidm = grde.inner_pidm (+)
            AND    sc_crn  = grde.inner_crn  (+)
-         );         
+         );
 
- COMMIT;
+COMMIT;
