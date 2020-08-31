@@ -127,7 +127,7 @@ select *
                    (SELECT DISTINCT p_term FROM extract_parameters)                       AS s_term,
                    (SELECT DISTINCT p_extract FROM extract_parameters)                       AS s_extract,
                    spriden_pidm                    AS s_pidm,
-                   spriden_id                      AS s_banner_id,
+                   'D' || spriden_id                      AS s_banner_id,
                    substr(spriden_last_name ,1,60) AS s_last_name,
                    substr(spriden_first_name,1,15) AS s_first_name,
                    substr(spriden_mi,        1,15) AS s_middle_name,
