@@ -412,7 +412,9 @@
  -- Citizenship Code - There should be a s_citz_code for every record.
 
     SELECT 'S-09' AS label, count(*) AS err_count
-    FROM   students_current
+    --SELECT a.s_pidm, s_banner_id, s_last_name, s_first_name, s_ethnic_n, s_citz_code, stvcitz_desc
+    FROM   students_current a
+    LEFT JOIN stvcitz b ON b.stvcitz_code = a.s_citz_code
     WHERE  s_citz_code IS NULL
 
  UNION
@@ -1120,9 +1122,11 @@
  -- Delivery Method - Check for valid values in c_delivery_method.
 
     SELECT 'C-12' AS label, count(*) AS err_count
+    --SELECT c_banner_term, c_crn, c_crs_subject, c_crs_number, c_crs_section, c_schd_code, c_delivery_method, c_enrl, 'Check delivery method' AS reason
     FROM   courses_current
-    WHERE  c_delivery_method NOT IN ('P','H','T','R','I','B','C')
+    WHERE  c_delivery_method NOT IN ('P','H','T','R','I','B','C', 'V')
     OR     c_delivery_method IS NULL
+
 
  UNION
 
@@ -1350,6 +1354,7 @@
     WHERE  c_enrl = 0 
     OR     c_enrl IS NULL
     OR     NOT EXISTS (SELECT 'Y' FROM student_courses_current WHERE c_crn = sc_crn)
+
     
  UNION
  
