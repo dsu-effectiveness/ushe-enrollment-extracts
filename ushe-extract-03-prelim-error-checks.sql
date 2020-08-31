@@ -955,7 +955,7 @@
 
     SELECT 'S-35b' AS label, count(*) AS err_count
     FROM   students_current
-    WHERE  LENGTH(s_banner_id) <> '8'
+    WHERE  LENGTH(s_banner_id) <> '9'
 
  UNION
 
