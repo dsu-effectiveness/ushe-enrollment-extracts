@@ -1244,6 +1244,7 @@ select *
            AND   (divs_code <> 'CE' OR divs_code  IS NULL)      -- Invalid Courses
            AND    CASE WHEN p_extract = '3'                     -- When Third Week...
                        THEN credit_hours_low ELSE 1 END > 0     -- ... Then eliminate zero credit courses.
+           AND subj_code != 'CED'
           ) /**/
           SELECT '3671' AS c_inst,
                  courses.c_year,
