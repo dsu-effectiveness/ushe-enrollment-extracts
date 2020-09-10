@@ -127,7 +127,7 @@ select *
                    (SELECT DISTINCT p_term FROM extract_parameters)                       AS s_term,
                    (SELECT DISTINCT p_extract FROM extract_parameters)                       AS s_extract,
                    spriden_pidm                    AS s_pidm,
-                   spriden_id                      AS s_banner_id,
+                   'D' || spriden_id                      AS s_banner_id,
                    substr(spriden_last_name ,1,60) AS s_last_name,
                    substr(spriden_first_name,1,15) AS s_first_name,
                    substr(spriden_mi,        1,15) AS s_middle_name,
@@ -1244,6 +1244,7 @@ select *
            AND   (divs_code <> 'CE' OR divs_code  IS NULL)      -- Invalid Courses
            AND    CASE WHEN p_extract = '3'                     -- When Third Week...
                        THEN credit_hours_low ELSE 1 END > 0     -- ... Then eliminate zero credit courses.
+           AND subj_code != 'CED'
           ) /**/
           SELECT '3671' AS c_inst,
                  courses.c_year,
@@ -1476,11 +1477,11 @@ select *
                           coll_code                            AS c_college,
                           dept_code                            AS c_dept,
                           levl_code1                           AS c_crs_level,
-                          CASE WHEN camp_code IN ('AC1','AU1') THEN 'A01'
-                               WHEN camp_code = 'B8C'          THEN 'B80'
-                               WHEN camp_code = 'UOS'          THEN 'C'
-                               WHEN camp_code = 'OU1'          THEN 'O01'
-                               ELSE camp_code END              AS c_site_type                               
+                          CASE WHEN camp_code IN ('AC1','AU1')  THEN 'A01'
+                               WHEN camp_code = 'B8C'           THEN 'B80'
+                               WHEN camp_code = 'UOS'           THEN 'C'
+                               WHEN camp_code IN ('OU1', 'V01') THEN 'O01'
+                               ELSE camp_code END               AS c_site_type
                    FROM   courses,
                           as_catalog_schedule
                    WHERE  crn_key = c_crn
@@ -1725,6 +1726,6 @@ select *
                   ) grde
            WHERE  sc_pidm = grde.inner_pidm (+)
            AND    sc_crn  = grde.inner_crn  (+)
-         );         
+         );
 
- COMMIT;
+COMMIT;
