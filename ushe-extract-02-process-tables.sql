@@ -135,45 +135,6 @@ select *
 
                    CASE WHEN (SELECT DISTINCT p_extract FROM extract_parameters) = '3' THEN 0 ELSE 1 END
                                                    AS s_xtrct_mltplr, -- Zeros data points during 3rd week
---                    CASE WHEN spriden_pidm IN
---                              ( -- If student has a citz_ind of 2 and resd_code of C
---                                SELECT s1.sgbstdn_pidm
---                                FROM   sgbstdn s1
---                                WHERE  s1.sgbstdn_term_code_eff =
---                                       (     -- Find most-recent effective term code
---                                         SELECT MAX(s2.sgbstdn_term_code_eff)
---                                         FROM   sgbstdn s2
---                                         WHERE  s2.sgbstdn_pidm = s1.sgbstdn_pidm
---                                         AND    s2.sgbstdn_term_code_eff <= p_banner_term
---                                       )
---                                AND    sgbstdn_pidm IN
---                                       (     -- Find students with citz_ind of 2
---                                         SELECT rcrapp1_pidm
---                                         FROM   rcrapp1@proddb, spbpers@proddb
---                                         WHERE  rcrapp1_pidm         = spbpers_pidm
---                                         AND    rcrapp1_aidy_code    = p_acyr
---                                         AND    rcrapp1_curr_rec_ind = 'Y'
---                                         AND    rcrapp1_citz_ind     = '2'
---                                         AND    spbpers_citz_code   <> '3'
---                                           AND spbpers_citz_code IS NULL
---                                       )
---                                AND    sgbstdn_resd_code IN ('C')
---                              )
---                         THEN '3'
---                         WHEN spriden_pidm IN -- If student just has a citz_ind of 2
---                              (
---                                SELECT rcrapp1_pidm
---                                FROM   rcrapp1@proddb, spbpers@proddb
---                                WHERE  rcrapp1_pidm         = spbpers_pidm
---                                AND    rcrapp1_aidy_code    = p_acyr
---                                AND    rcrapp1_curr_rec_ind = 'Y'
---                                AND    rcrapp1_citz_ind     = '2'
---                                AND    spbpers_citz_code   <> '3'
---                              )
---                         THEN '2'
---                         ELSE -- Use Citizenship Code in SPBPERS, or 9 if no code in SPBPERS
---                              nvl(spbpers_citz_code,'9')
---                         END
                           COALESCE(spbpers_citz_code, rcrapp1_citz_ind)  AS s_citz_code,
                    (  -- from SABSUPL
                      SELECT ROWID
@@ -285,7 +246,7 @@ select *
                  students.s_pidm,
                  students.s_banner_id,
                  pers.s_id,
-                 CASE WHEN substr(pers.s_id,-8) = students.s_banner_id THEN 'I' ELSE 'S' END AS s_id_flag,
+                 CASE WHEN LENGTH(pers.s_id) = 8 THEN 'I' ELSE 'S' END AS s_id_flag,
                  -------------------------
                  students.s_first_name,
                  students.s_last_name,
@@ -1121,6 +1082,7 @@ select *
           AND    students.s_pidm = tran.inner_pidm (+)
           AND    students.s_pidm = visa.inner_pidm (+) 
         );
+
 
  COMMIT;       
  ------------------------------------------------------------------------------------------------------------
