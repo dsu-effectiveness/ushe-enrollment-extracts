@@ -1,4 +1,3 @@
-
  ------------------------------------------------------------------------------------------------------------
  /*
     This script will move the extract tables from current tables into the DSCIR archive. You should be 
@@ -17,7 +16,7 @@
   BEGIN
   
   -- Manual Parameter: --------- --
-     v_dsu_extract := '20202E';
+     v_dsu_extract := '20203E';
      v_database    := 'proddb';
   -- --------------------------- --
 
@@ -43,7 +42,7 @@
 END;
 /**/
  -- Create Temp Table for Students Data 
-    CREATE TABLE ts20202E AS
+    CREATE TABLE ts20203E AS
                  SELECT s_inst, 
                         s_year, 
                         s_term, 
@@ -117,7 +116,7 @@ END;
                         cohort_block,
                         s_term_att_cr, 
                         s_term_earned_cr,
-                        '20202E' AS dsc_term_code,
+                        '20203E' AS dsc_term_code,
                         cur_minor1, 
                         cur_minor2,
                         religion, 
@@ -133,10 +132,10 @@ END;
                         hsgpa,
                        (SELECT gorvisa_vtyp_code FROM gorvisa@proddb     WHERE gorvisa_pidm = pidm) AS vtyp_code,
                        (SELECT hsgpact_hsgpact   from dsc.hsgpact@proddb where hsgpact_pidm = pidm) AS index_score
-                 FROM   students_20202E@proddb;
+                 FROM   students_20203E@proddb;
                            
  -- Create Temp Table for Courses Data 
-    CREATE TABLE tc20202E AS
+    CREATE TABLE tc20203E AS
                  SELECT c_inst, 
                         c_year, 
                         c_term, 
@@ -181,7 +180,7 @@ END;
                         c_dest_site,
                         dsc_fye, 
                         enrl AS c_class_size,
-                        '20202E' AS c_banner_extract,
+                        '20203E' AS c_banner_extract,
                         c_level,
                         s11_wkld,
                         '   ' AS s11_wkld_cat,
@@ -196,10 +195,10 @@ END;
                         c_bldg_num3,
                         c_room_max3,
                         c_room_type3
-                 FROM   course_20202E@proddb;
+                 FROM   course_20203E@proddb;
 
  -- Create Temp Table for Student Courses Data 
-    CREATE TABLE tsc20202E AS
+    CREATE TABLE tsc20203E AS
                  SELECT sc_inst, 
                         sc_year, 
                         sc_term,
@@ -219,38 +218,40 @@ END;
                         sc.pidm AS dsc_pidm,
                         gmod, 
                         dsc_loc_recvd, 
-                        '20202E' AS dsc_term_code,
+                        '20203E' AS dsc_term_code,
                         sc.term,
                         s_banner_id,
                         c.c_level AS sc_level,
                         c.c_delivery_method AS sc_del_method
-                 FROM   student_course_20202E@proddb sc,
-                        students_20202E@proddb s,
-                        course_20202E@proddb c
+                 FROM   student_course_20203E@proddb sc,
+                        students_20203E@proddb s,
+                        course_20203E@proddb c
                  WHERE  s.pidm = sc.pidm
                     AND  sc.crn = c.crn;
                     
  ------------------------------------------------------------------------------------------------------------
     
     -- Purge any previously imported records, if they exists, to prevent duplicates.                 
-    DELETE FROM students03      WHERE dsc_term_code = '20202E';
-    DELETE FROM courses         WHERE dsc_term_code = '20202E';
-    DELETE FROM student_courses WHERE dsc_term_code = '20202E';
+    DELETE FROM students03      WHERE dsc_term_code = '20203E';
+    DELETE FROM courses         WHERE dsc_term_code = '20203E';
+    DELETE FROM student_courses WHERE dsc_term_code = '20203E';
     
     -- Insert records from temp tables into the extract tables.
-    INSERT INTO students03      SELECT * FROM  ts20202E;
-    INSERT INTO courses         SELECT * FROM  tc20202E;
-    INSERT INTO student_courses SELECT * FROM tsc20202E;
+    INSERT INTO students03      SELECT * FROM  ts20203E;
+    INSERT INTO courses         SELECT * FROM  tc20203E;
+    INSERT INTO student_courses SELECT * FROM tsc20203E;
+
+
     
     -- Verify Imported Data.
-    SELECT * FROM students03      WHERE dsc_term_code = '20202E';
-    SELECT * FROM courses         WHERE dsc_term_code = '20202E';
-    SELECT * FROM student_courses WHERE dsc_term_code = '20202E';
+    SELECT * FROM students03      WHERE dsc_term_code = '20203E';
+    SELECT * FROM courses         WHERE dsc_term_code = '20203E';
+    SELECT * FROM student_courses WHERE dsc_term_code = '20203E';
 
     -- Delete temp tables.
-    DROP TABLE  ts20202E;
-    DROP TABLE  tc20202E;
-    DROP TABLE tsc20202E;
+    DROP TABLE  ts20203E;
+    DROP TABLE  tc20203E;
+    DROP TABLE tsc20203E;
     
      COMMIT;
     
@@ -285,4 +286,4 @@ END;
  */ 
  ------------------------------------------------------------------------------------------------------------
  
--- end of file 
+-- end of file
