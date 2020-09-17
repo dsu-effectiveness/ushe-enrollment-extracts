@@ -87,7 +87,7 @@ END;
                         nvl(0,0) AS s_census_date, 
                         s_regent_res as s_rpt_res, 
                         s_ssid, 
-                        s_banner_id,
+                        SUBSTR(s_banner_id,2,8) AS s_banner_id,
                         hsgrad_dt AS dsc_hsgrad_dt, 
                         pidm AS dsc_pidm,
                         s_act_comp,
@@ -220,7 +220,7 @@ END;
                         dsc_loc_recvd, 
                         '20203E' AS dsc_term_code,
                         sc.term,
-                        s_banner_id,
+                        SUBSTR(s_banner_id,2,8) AS sc_banner_id,
                         c.c_level AS sc_level,
                         c.c_delivery_method AS sc_del_method
                  FROM   student_course_20203E@proddb sc,
