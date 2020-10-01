@@ -127,7 +127,7 @@ select *
                    (SELECT DISTINCT p_term FROM extract_parameters)                       AS s_term,
                    (SELECT DISTINCT p_extract FROM extract_parameters)                       AS s_extract,
                    spriden_pidm                    AS s_pidm,
-                   'D' || spriden_id                      AS s_banner_id,
+                   'D' || spriden_id               AS s_banner_id,
                    substr(spriden_last_name ,1,60) AS s_last_name,
                    substr(spriden_first_name,1,15) AS s_first_name,
                    substr(spriden_mi,        1,15) AS s_middle_name,
@@ -442,12 +442,12 @@ select *
                                END  AS s_county_origin,
                           CASE WHEN stat_code IS NOT NULL
                                THEN CASE WHEN stat_code IN
-                                              (
-                                                'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA',
-                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME',
-                                                'MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ','NM',
-                                                'NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX',
-                                                'UT','VA','VT','WA','WI','WV','WY'
+                                            (
+                                                'AA', 'AE', 'AK','AL','AP', 'AR', 'AS','AZ','CA','CO','CT','DC','DE','FL','FM','GA','GU',
+                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MH',
+                                                'MI','MN','MO','MP','MS','MT','NC','ND','NE','NH','NJ','NM',
+                                                'NV','NY','OH','OK','OR','PA','PR','PW','RI','SC','SD','TN','TX',
+                                                'UT','VA','VI','VT','WA','WI','WV','WY'
                                               )
                                          THEN stat_code
                                          ELSE 'XX' END
@@ -834,7 +834,7 @@ select *
                  ) pell,
                  (     -- Pull personal data from SPBPERS and SPRIDEN
                    SELECT spbpers_pidm AS inner_pidm,
-                          CASE WHEN spbpers_citz_code = 2 THEN spriden_id
+                          CASE WHEN spbpers_citz_code = 2 THEN 'D' || spriden_id
                                ELSE CASE WHEN NOT
                                     (
                                          (substr(spbpers_ssn,0,2) != '00' AND substr(spbpers_ssn,4,2) = '00') -- dummy ID
@@ -851,7 +851,7 @@ select *
                                       OR  spbpers_ssn LIKE '%[a-z]%'                                          -- contains nondigit
                                     )
                                     THEN trim(spbpers_ssn)
-                                    ELSE spriden_id END END      AS s_id,
+                                    ELSE 'D' || spriden_id END END      AS s_id,
                           spbpers_sex                            AS s_gender,
                           CASE WHEN upper(REPLACE(substr(spbpers_name_suffix, 1, 4),'.',''))
                                     NOT IN ('BAP','CAP','ESQ','MD','NA','JL','TY','JDB','MJE','E','ANM')
@@ -1083,7 +1083,9 @@ select *
           AND    students.s_pidm = visa.inner_pidm (+)
         );
 
- COMMIT;       
+ COMMIT;
+
+
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------       
@@ -1701,4 +1703,9 @@ UPDATE students_current
 SET s_entry_action = 'RS'
 WHERE s_pidm IN ('144595');
 
+UPDATE students_current
+SET s_entry_action = 'CG'
+WHERE s_pidm = '76101';
+
 COMMIT;
+
