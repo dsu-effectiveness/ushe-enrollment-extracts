@@ -246,7 +246,7 @@ select *
                  students.s_pidm,
                  students.s_banner_id,
                  pers.s_id,
-                 CASE WHEN LENGTH(pers.s_id) = 8 THEN 'I' ELSE 'S' END AS s_id_flag,
+                 CASE WHEN pers.s_id LIKE 'D%' THEN 'I' ELSE 'S' END AS s_id_flag,
                  -------------------------
                  students.s_first_name,
                  students.s_last_name,
@@ -459,11 +459,11 @@ select *
                                     THEN (SELECT iso_code FROM country_iso WHERE fips_code = natn_code)
                                ELSE CASE WHEN stat_code IN
                                               (
-                                                'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA',
-                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME',
-                                                'MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ','NM',
-                                                'NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX',
-                                                'UT','VA','VT','WA','WI','WV','WY'
+                                                'AA', 'AE', 'AK','AL','AP', 'AR', 'AS','AZ','CA','CO','CT','DC','DE','FL','FM','GA','GU',
+                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MH',
+                                                'MI','MN','MO','MP','MS','MT','NC','ND','NE','NH','NJ','NM',
+                                                'NV','NY','OH','OK','OR','PA','PR','PW','RI','SC','SD','TN','TX',
+                                                'UT','VA','VI','VT','WA','WI','WV','WY'
                                               )
                                          THEN 'US'
                                          ELSE 'ER' END
@@ -1707,5 +1707,51 @@ UPDATE students_current
 SET s_entry_action = 'CG'
 WHERE s_pidm = '76101';
 
-COMMIT;
+UPDATE students_current
+SET s_state_origin = 'UT', s_county_origin = 'UT053'
+WHERE s_banner_id IN (
+'D00042810',
+'D00041511',
+'D00427966',
+'D00070135');
 
+UPDATE students_current
+SET s_state_origin = 'UN'
+WHERE s_banner_id = 'D00037836';
+
+UPDATE students_current
+SET s_state_origin = 'AP'
+WHERE s_banner_id = 'D00427966';
+
+UPDATE students_current
+SET s_country_origin = 'US'
+WHERE s_banner_id IN (
+'D00315526',
+'D00363726',
+'D00327938',
+'D00415110',
+'D00414209',
+'D00393891');
+
+UPDATE students_current
+SET s_id_flag = CASE WHEN s_id LIKE 'D%' THEN 'I' ELSE 'S' END;
+
+UPDATE students_current
+SET s_county_origin = 'UT030'
+WHERE s_banner_id = 'D00427966';
+
+UPDATE students_current
+SET s_county_origin = 'UT053'
+WHERE s_banner_id;
+
+UPDATE students_current
+SET s_county_origin = 'UT099'
+WHERE s_banner_id IN ('D00327938',
+'D00393891',
+'D00315526',
+'D00363726',
+'D00415110',
+'D00414209'
+);
+
+COMMIT;
