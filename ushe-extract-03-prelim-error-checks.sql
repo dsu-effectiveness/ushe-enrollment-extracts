@@ -3,117 +3,6 @@
  -- confirmation of the results they provide us in the error fix file.
  -- -jv
 
- ----------------------------------------------------------------------------------------------------
- ----------------------------------------------------------------------------------------------------
- -- ALL TABLES:                                                                                    --
- ----------------------------------------------------------------------------------------------------
- ----------------------------------------------------------------------------------------------------
-
- -- SELECT * FROM students_current;
- -- SELECT * FROM courses_current;
- -- SELECT * FROM student_courses_current where sc_grade is null;
- -- SELECT * FROM students_current s, courses_current c, student_courses_current sc WHERE s_pidm = sc_pidm AND c_crn = sc_crn;
-
- -- One-Time Fixes ------------------------------------------------------------------------------------------
-  
---   UPDATE students_current SET s_entry_action = 'HS'
---             WHERE s_banner_id     = '00415580';
---   UPDATE students_current SET s_entry_action = 'NG'
---             WHERE s_banner_id    in ('00205890', '00260843');
---   UPDATE student_courses_current SET sc_stud_type = 'DC'
---             WHERE  sc_banner_id||sc_stud_type = '00397385EC';
---   UPDATE students_current SET S_citz_code = '9'
---             WHERE S_BANNER_ID in ('00357750', '00080889', '00320707', '00392764', '00415513', '00378693');
---   UPDATE students_current SET S_Ethnic_N = Null
---             WHERE S_BANNER_ID in ('00357750', '00080889', '00320707', '00392764', '00415513', '00378693');
---   UPDATE students_current SET S_Ethnic = 'W'
---             WHERE S_BANNER_ID in ('00080889');
---   UPDATE students_current SET S_Ethnic_W = 'W'
---             WHERE S_BANNER_ID in ('00080889', '00392764');
---   UPDATE students_current SET S_Ethnic = 'H'
---             WHERE S_BANNER_ID in ('00320707', '00378693');
---   UPDATE students_current SET S_Ethnic_H = 'H'
---             WHERE S_BANNER_ID in ('00320707', '00378693');
---   UPDATE students_current SET S_Ethnic = 'B'
---             WHERE S_BANNER_ID in ('00357750');
---   UPDATE students_current SET S_Ethnic_B = 'B'
---             WHERE S_BANNER_ID in ('00357750', '00392764');
---   UPDATE students_current SET S_Ethnic = '2'
---             WHERE S_BANNER_ID in ('00392764');
---   UPDATE students_current SET S_Ethnic = 'A'
---             WHERE S_BANNER_ID in ('00415513');
---   UPDATE students_current SET S_Ethnic_A = 'A'
---             WHERE S_BANNER_ID in ('00415513');
---   UPDATE courses_current SET c_delivery_method = 'I'
---             WHERE c_crn IN ('22585', '22710', '22858', '23171', '22986');
---   UPDATE courses_current SET c_delivery_method = 'P'
---             WHERE c_crn IN ('22715', '23116');
---   UPDATE courses_current SET C_SITE_TYPE = 'A01'
---             WHERE c_crn IN ('22715', '23116');
---   UPDATE courses_current SET C_SITE_TYPE = 'C21'
---             WHERE c_crn IN ('21599', '22025', '22027', '22028', '22683');
---   UPDATE courses_current SET C_SITE_TYPE = 'C'
---             WHERE c_crn IN ('21345', '21382', '21189', '21522', '22023', '22024', '22026', '22679', '22680', '22681', '22682', '22728');
---   UPDATE courses_current SET C_CRS_SECTION = '40'
---             WHERE c_crn IN ('21555', '23136');
---   UPDATE student_courses_current SET SC_CRS_SEC = '40'
---             WHERE sc_crn IN ('21555', '23136');
---   COMMIT;
-  
-  
--- SELECT * FROM students_current WHERE S_BANNER_ID in ('00357750', '00080889', '00320707', '00392764', '00415513', '00378693');
--- Select * from courses_current where 
-  /*
-  UPDATE students_current SET s_entry_action = 'FH' WHERE s_pidm     = 249145;
-  UPDATE students_current SET s_act_comp     = NULL WHERE s_act_comp = 0;
-  UPDATE students_current SET s_act_sci      = NULL WHERE s_act_sci  = 0;
-  UPDATE students_current SET s_cur_cip2     = '430104', s_cur_coll_code2 = 'HU' WHERE s_pidm = '224081';
-  
-  UPDATE student_courses_current SET sc_crn     = '40001', 
-                                     sc_crs_sec = '06'
-  WHERE  sc_banner_id = '00404196' 
-  AND    sc_crn       = '43291';
-  
-  UPDATE student_courses_current SET sc_stud_type = 'CC' 
-  WHERE  sc_banner_id||sc_stud_type IN ('00419072EC','00376526EC','00418690EC','00419151EC','00418945EC','00403033EC');
-  
-  UPDATE student_courses_current SET sc_stud_type = 'DC' 
-  WHERE  sc_banner_id||sc_stud_type IN ('00415508EC','00376848EC','00375579EC');
-  
-  update students_current SET s_cur_majr1      = 'PSYC', 
-                              s_major_desc1    = 'Psychology',
-                              s_cur_prgm1      = 'BS-PSY', 
-                              s_cur_degc1      = 'BS', 
-                              s_cur_coll_code1 = 'HU', 
-                              s_cur_cip1       = '420101',
-                              s_cur_cip_ushe   = '420101',
-                              s_deg_intent     = '4'
-  WHERE  s_pidm = '271282';
-  
-  UPDATE student_courses_current
-  SET    sc_stud_type = 'EC' 
-  WHERE  sc_banner_id||sc_stud_type IN 
-         (
-          '00419072'||'CC',
-          '00376526'||'CC',
-          '00403033'||'CC',
-          '00418945'||'CC',
-          '00419151'||'CC',
-          '00418690'||'CC'
-         );
-  
-  UPDATE courses_current SET c_budget_code  = 'BC' WHERE c_crn     IN ('43282','43351');
-  UPDATE courses_current SET c_enrl = 22 WHERE c_crn = '40001';
-  UPDATE courses_current SET c_enrl =  1 WHERE c_crn = '43291'; 
-
-    
- /**/  
- ------------------------------------------------------------------------------------------------------------
-
--- CREATE TABLE students03_copy      as select * from students03@dscir;
--- CREATE TABLE courses_copy         as select * from courses@dscir;
--- CREATE TABLE student_courses_copy as select * from student_courses@dscir;
-
  SELECT * FROM
  (
 
@@ -346,6 +235,7 @@
 
  UNION
 
+
  -- S-04c --------------------------------------------------------------------------------------------
  -- ID Flag - Every student should have a valid id_flag.
 
@@ -451,7 +341,7 @@
  -- State Codes - Checks where the state is UT but county is out of state.
 
     SELECT 'S-11a' AS label, count(*) AS err_count
- -- SELECT s_state_origin, s_county_origin, s_country_origin, students_current.*
+ -- SELECT s_state_origin, s_county_origin, s_country_origin, s_cur_zip_code, students_current.*
     FROM   students_current
     WHERE  s_state_origin = 'UT'
     AND    s_county_origin IN ('UT097','UT099')
