@@ -10,7 +10,7 @@
     p_extract       VARCHAR2(1)
   );
   
-  INSERT INTO extract_parameters VALUES ('20203E','202030','2021','2021','1','E');
+  INSERT INTO extract_parameters VALUES ('202043','202040','2021','2021','2','3');
 */
 
 select *
@@ -127,7 +127,7 @@ select *
                    (SELECT DISTINCT p_term FROM extract_parameters)                       AS s_term,
                    (SELECT DISTINCT p_extract FROM extract_parameters)                       AS s_extract,
                    spriden_pidm                    AS s_pidm,
-                   'D' || spriden_id                      AS s_banner_id,
+                   'D' || spriden_id               AS s_banner_id,
                    substr(spriden_last_name ,1,60) AS s_last_name,
                    substr(spriden_first_name,1,15) AS s_first_name,
                    substr(spriden_mi,        1,15) AS s_middle_name,
@@ -135,52 +135,13 @@ select *
 
                    CASE WHEN (SELECT DISTINCT p_extract FROM extract_parameters) = '3' THEN 0 ELSE 1 END
                                                    AS s_xtrct_mltplr, -- Zeros data points during 3rd week
---                    CASE WHEN spriden_pidm IN
---                              ( -- If student has a citz_ind of 2 and resd_code of C
---                                SELECT s1.sgbstdn_pidm
---                                FROM   sgbstdn s1
---                                WHERE  s1.sgbstdn_term_code_eff =
---                                       (     -- Find most-recent effective term code
---                                         SELECT MAX(s2.sgbstdn_term_code_eff)
---                                         FROM   sgbstdn s2
---                                         WHERE  s2.sgbstdn_pidm = s1.sgbstdn_pidm
---                                         AND    s2.sgbstdn_term_code_eff <= p_banner_term
---                                       )
---                                AND    sgbstdn_pidm IN
---                                       (     -- Find students with citz_ind of 2
---                                         SELECT rcrapp1_pidm
---                                         FROM   rcrapp1@proddb, spbpers@proddb
---                                         WHERE  rcrapp1_pidm         = spbpers_pidm
---                                         AND    rcrapp1_aidy_code    = p_acyr
---                                         AND    rcrapp1_curr_rec_ind = 'Y'
---                                         AND    rcrapp1_citz_ind     = '2'
---                                         AND    spbpers_citz_code   <> '3'
---                                           AND spbpers_citz_code IS NULL
---                                       )
---                                AND    sgbstdn_resd_code IN ('C')
---                              )
---                         THEN '3'
---                         WHEN spriden_pidm IN -- If student just has a citz_ind of 2
---                              (
---                                SELECT rcrapp1_pidm
---                                FROM   rcrapp1@proddb, spbpers@proddb
---                                WHERE  rcrapp1_pidm         = spbpers_pidm
---                                AND    rcrapp1_aidy_code    = p_acyr
---                                AND    rcrapp1_curr_rec_ind = 'Y'
---                                AND    rcrapp1_citz_ind     = '2'
---                                AND    spbpers_citz_code   <> '3'
---                              )
---                         THEN '2'
---                         ELSE -- Use Citizenship Code in SPBPERS, or 9 if no code in SPBPERS
---                              nvl(spbpers_citz_code,'9')
---                         END
                           COALESCE(spbpers_citz_code, rcrapp1_citz_ind)  AS s_citz_code,
                    (  -- from SABSUPL
                      SELECT ROWID
                      FROM   sabsupl s1
                      WHERE  s1.sabsupl_pidm = spriden_pidm
                      AND    s1.sabsupl_natn_code_admit IS NOT NULL
-                     AND    s1.sabsupl_appl_no||s1.sabsupl_term_code_entry = 
+                     AND    s1.sabsupl_appl_no||s1.sabsupl_term_code_entry =
                             (
                               SELECT MIN(s2.sabsupl_appl_no||s2.sabsupl_term_code_entry)
                               FROM   sabsupl s2
@@ -195,34 +156,34 @@ select *
                           WHERE  s1.spraddr_pidm = spriden_pidm
                           AND    s1.spraddr_atyp_code = '00'
                           AND    s1.spraddr_natn_code IS NOT NULL
-                          AND    s1.spraddr_seqno = 
+                          AND    s1.spraddr_seqno =
                                  (     -- Find largest sequence number
                                    SELECT MAX(s2.spraddr_seqno)
-                                   FROM   spraddr s2 
+                                   FROM   spraddr s2
                                    WHERE  s2.spraddr_pidm = s1.spraddr_pidm
                                    AND    s2.spraddr_atyp_code = '00'
                                    AND    s2.spraddr_natn_code IS NOT NULL
-                                 )  
+                                 )
                         ),nvl(
                         (     -- Check for usable Address with Country Code
                           SELECT ROWID
                           FROM   spraddr s1
                           WHERE  s1.spraddr_pidm = spriden_pidm
                           AND    s1.spraddr_natn_code IS NOT NULL
-                          AND    s1.spraddr_atyp_code = 
+                          AND    s1.spraddr_atyp_code =
                                  (     -- Find the lowest ATYP Code
                                    SELECT MIN(s2.spraddr_atyp_code)
-                                   FROM   spraddr s2 
+                                   FROM   spraddr s2
                                    WHERE  s2.spraddr_pidm = s1.spraddr_pidm
                                    AND    s2.spraddr_natn_code IS NOT NULL
                                  )
-                          AND    s1.spraddr_seqno = 
+                          AND    s1.spraddr_seqno =
                                  (     -- Find the largest sequence number
                                    SELECT MAX(s2.spraddr_seqno)
-                                   FROM   spraddr s2 
+                                   FROM   spraddr s2
                                    WHERE  s2.spraddr_pidm = s1.spraddr_pidm
                                    AND    s2.spraddr_natn_code IS NOT NULL
-                                   AND    s2.spraddr_atyp_code = 
+                                   AND    s2.spraddr_atyp_code =
                                           (     -- Find the lowest ATYP code
                                             SELECT MIN(s3.spraddr_atyp_code)
                                             FROM   spraddr s3
@@ -234,28 +195,28 @@ select *
                           SELECT ROWID
                           FROM   spraddr s1
                           WHERE  s1.spraddr_pidm = spriden_pidm
-                          AND    s1.spraddr_stat_code IS NOT NULL 
-                          AND    s1.spraddr_atyp_code = 
+                          AND    s1.spraddr_stat_code IS NOT NULL
+                          AND    s1.spraddr_atyp_code =
                                  (     -- Find lowest ATYP Code
                                    SELECT MIN(s2.spraddr_atyp_code)
-                                   FROM   spraddr s2 
+                                   FROM   spraddr s2
                                    WHERE  s2.spraddr_pidm = s1.spraddr_pidm
-                                   AND    s2.spraddr_stat_code IS NOT NULL 
+                                   AND    s2.spraddr_stat_code IS NOT NULL
                                  )
-                          AND    s1.spraddr_seqno = 
+                          AND    s1.spraddr_seqno =
                                  (     -- Find largest sequence number
                                    SELECT MAX(s2.spraddr_seqno)
-                                   FROM   spraddr s2 
+                                   FROM   spraddr s2
                                    WHERE  s2.spraddr_pidm = s1.spraddr_pidm
-                                   AND    s2.spraddr_stat_code IS NOT NULL 
-                                   AND    s2.spraddr_atyp_code = 
+                                   AND    s2.spraddr_stat_code IS NOT NULL
+                                   AND    s2.spraddr_atyp_code =
                                           (     -- Find smallest ATYP Code
                                             SELECT MIN(s3.spraddr_atyp_code)
                                             FROM   spraddr s3
                                             WHERE  s3.spraddr_pidm = s2.spraddr_pidm
-                                            AND    s2.spraddr_stat_code IS NOT NULL 
+                                            AND    s2.spraddr_stat_code IS NOT NULL
                                           )
-                                )                                            
+                                )
                         ))) AS spraddr_rowid
 
             FROM   spriden a
@@ -272,10 +233,10 @@ select *
             AND    (
                      SELECT upper(title)
                      FROM   as_catalog_schedule
-                     WHERE  sfrstcr_crn = crn_key 
+                     WHERE  sfrstcr_crn = crn_key
                      AND    term_code_key = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                      AND    ssts_code = 'A'
-                   ) NOT LIKE '%LITERACY EXAM%'      
+                   ) NOT LIKE '%LITERACY EXAM%'
           ) /**/
           SELECT '3671' AS s_inst,
                  students.s_year,
@@ -285,7 +246,7 @@ select *
                  students.s_pidm,
                  students.s_banner_id,
                  pers.s_id,
-                 CASE WHEN substr(pers.s_id,-8) = students.s_banner_id THEN 'I' ELSE 'S' END AS s_id_flag,
+                 CASE WHEN pers.s_id LIKE 'D%' THEN 'I' ELSE 'S' END AS s_id_flag,
                  -------------------------
                  students.s_first_name,
                  students.s_last_name,
@@ -301,9 +262,9 @@ select *
                  addr.s_county_origin,
                  addr.s_state_origin,
                  addr.s_country_origin,
-                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10 
+                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10
                       THEN substr(addr.s_cur_zip_code,1,5)
-                      ELSE addr.s_cur_zip_code 
+                      ELSE addr.s_cur_zip_code
                       END AS s_cur_zip_code,
                  -------------------------
                  pers.s_birth_dt,
@@ -312,28 +273,28 @@ select *
                  students.s_citz_code,
                  pers.s_ethnic,
                  CASE WHEN pers.s_ethnic = 'H'                THEN 'H'
-                      WHEN pers.s_ethnic = '2' 
-                       AND instr(pers.all_race_codes,'H') > 0 THEN 'H' 
+                      WHEN pers.s_ethnic = '2'
+                       AND instr(pers.all_race_codes,'H') > 0 THEN 'H'
                        END AS s_ethnic_h,
                  CASE WHEN pers.s_ethnic = 'A'                THEN 'A'
-                      WHEN pers.s_ethnic = '2' 
-                       AND instr(pers.all_race_codes,'A') > 0 THEN 'A' 
+                      WHEN pers.s_ethnic = '2'
+                       AND instr(pers.all_race_codes,'A') > 0 THEN 'A'
                        END AS s_ethnic_a,
                  CASE WHEN pers.s_ethnic = 'B'                THEN 'B'
-                      WHEN pers.s_ethnic = '2' 
+                      WHEN pers.s_ethnic = '2'
                        AND instr(pers.all_race_codes,'B') > 0 THEN 'B'
                        END AS s_ethnic_b,
                  CASE WHEN pers.s_ethnic = 'I'                THEN 'I'
-                      WHEN pers.s_ethnic = '2' 
+                      WHEN pers.s_ethnic = '2'
                        AND instr(pers.all_race_codes,'I') > 0 THEN 'I'
                        END AS s_ethnic_i,
                  CASE WHEN pers.s_ethnic = 'P'                THEN 'P'
-                      WHEN pers.s_ethnic = '2' 
-                       AND instr(pers.all_race_codes,'P') > 0 THEN 'P' 
+                      WHEN pers.s_ethnic = '2'
+                       AND instr(pers.all_race_codes,'P') > 0 THEN 'P'
                        END AS s_ethnic_p,
                  CASE WHEN pers.s_ethnic = 'W'                THEN 'W'
-                      WHEN pers.s_ethnic = '2' 
-                       AND instr(pers.all_race_codes,'W') > 0 THEN 'W' 
+                      WHEN pers.s_ethnic = '2'
+                       AND instr(pers.all_race_codes,'W') > 0 THEN 'W'
                        END AS s_ethnic_w,
                  CASE WHEN pers.s_ethnic = 'N'                THEN 'N'
                        END AS s_ethnic_n,
@@ -347,15 +308,15 @@ select *
                  f_calc_entry_action_2
                  ( students.s_pidm,
                    students.s_banner_term
-                 ) AS s_entry_action, 
+                 ) AS s_entry_action,
                  -------------------------
                  stdn.s_styp,
-                 CASE WHEN majr.s_cur_degc1 LIKE 'N%' THEN '0' 
-                      WHEN stdn.s_styp         = 'P'  THEN '0' 
-                      WHEN majr.s_cur_degc1 LIKE 'C%' THEN '1'  
+                 CASE WHEN majr.s_cur_degc1 LIKE 'N%' THEN '0'
+                      WHEN stdn.s_styp         = 'P'  THEN '0'
+                      WHEN majr.s_cur_degc1 LIKE 'C%' THEN '1'
                       WHEN majr.s_cur_degc1 LIKE 'A%' THEN '2'
-                      WHEN majr.s_cur_degc1 LIKE 'B%' THEN '4' 
-                      WHEN majr.s_cur_degc1 LIKE 'M%' THEN 'M' 
+                      WHEN majr.s_cur_degc1 LIKE 'B%' THEN '4'
+                      WHEN majr.s_cur_degc1 LIKE 'M%' THEN 'M'
                       ELSE 'E' END AS s_deg_intent,
                  majr.s_cur_prgm1,
                  majr.s_cur_prgm2,
@@ -363,11 +324,11 @@ select *
                  majr.s_cur_degc2,
                  majr.s_cur_majr1,
                  majr.s_cur_majr2,
-                 CASE WHEN s_cur_prgm1 = 'ND-ESL' THEN 'GE' -- Temp fix, it shouldn't be necessary. 
+                 CASE WHEN s_cur_prgm1 = 'ND-ESL' THEN 'GE' -- Temp fix, it shouldn't be necessary.
                       ELSE (SELECT school_code FROM dsc_programs_current WHERE prgm_code = majr.s_cur_prgm1)
                       END AS s_cur_coll_code1,
                  CASE WHEN majr.s_cur_prgm2 IS NULL THEN NULL
-                      ELSE (SELECT school_code FROM dsc_programs_current WHERE prgm_code = majr.s_cur_prgm2) 
+                      ELSE (SELECT school_code FROM dsc_programs_current WHERE prgm_code = majr.s_cur_prgm2)
                       END AS s_cur_coll_code2,
                  majr.s_cur_cip1,
                  CASE WHEN majr.s_cur_prgm2 IS NULL THEN NULL ELSE majr.s_cur_cip2 END AS s_cur_cip2,
@@ -388,13 +349,13 @@ select *
                  gphr.s_cum_gpa_grad,
                  NULL AS s_cum_mem_hrs,
                  tran.s_trans_total,
-                 CASE WHEN stdn.levl_code = 'UG' 
+                 CASE WHEN stdn.levl_code = 'UG'
                            THEN CASE WHEN stcr.s_term_att_cr >= 120 THEN 'F' ELSE 'P' END
-                      WHEN stdn.levl_code = 'GR' 
+                      WHEN stdn.levl_code = 'GR'
                            THEN CASE WHEN stcr.s_term_att_cr >=  90 THEN 'F' ELSE 'P' END
                            ELSE 'P'
                       END AS s_pt_ft,
-                 CASE WHEN majr.s_cur_degc1 LIKE 'M%' 
+                 CASE WHEN majr.s_cur_degc1 LIKE 'M%'
                            THEN 'GG'
                       WHEN EXISTS
                            (
@@ -435,7 +396,7 @@ select *
                              AND    shrlgpa_gpa_type_ind = 'O'
                              HAVING sum(shrlgpa_hours_earned) >= 90
                            )
-                      THEN 'SR' 
+                      THEN 'SR'
                       ELSE 'FR' END AS s_level,
                  -------------------------
                  hsch.s_high_school,
@@ -472,42 +433,42 @@ select *
                    SELECT s_pidm          AS inner_pidm,
                           CASE WHEN natn_code != 'US' AND stat_code != 'UT'
                                     THEN 'UT097'
-                               WHEN stat_code != 'UT' 
+                               WHEN stat_code != 'UT'
                                     THEN 'UT099'
                                WHEN (cnty_code = 'UT' AND stat_code = 'UT')
                                  OR (stat_code = 'UT' AND cnty_code IN ('UT097','UT099'))
                                     THEN 'UT053' -- catch-all for UT residents
                                     ELSE cnty_code
                                END  AS s_county_origin,
-                          CASE WHEN stat_code IS NOT NULL 
-                               THEN CASE WHEN stat_code IN 
-                                              (
-                                                'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA',
-                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME',
-                                                'MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ','NM',
-                                                'NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX',
-                                                'UT','VA','VT','WA','WI','WV','WY'
+                          CASE WHEN stat_code IS NOT NULL
+                               THEN CASE WHEN stat_code IN
+                                            (
+                                                'AA', 'AE', 'AK','AL','AP', 'AR', 'AS','AZ','CA','CO','CT','DC','DE','FL','FM','GA','GU',
+                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MH',
+                                                'MI','MN','MO','MP','MS','MT','NC','ND','NE','NH','NJ','NM',
+                                                'NV','NY','OH','OK','OR','PA','PR','PW','RI','SC','SD','TN','TX',
+                                                'UT','VA','VI','VT','WA','WI','WV','WY'
                                               )
-                                         THEN stat_code 
+                                         THEN stat_code
                                          ELSE 'XX' END
-                               ELSE CASE WHEN natn_code != 'US' 
+                               ELSE CASE WHEN natn_code != 'US'
                                          THEN 'XX'
-                                         ELSE 'ER' END 
+                                         ELSE 'ER' END
                                END AS s_state_origin,
                           CASE WHEN natn_code IS NOT NULL
                                     THEN (SELECT iso_code FROM country_iso WHERE fips_code = natn_code)
                                ELSE CASE WHEN stat_code IN
                                               (
-                                                'AK','AL','AR','AZ','CA','CO','CT','DC','DE','FL','GA',
-                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME',
-                                                'MI','MN','MO','MS','MT','NC','ND','NE','NH','NJ','NM',
-                                                'NV','NY','OH','OK','OR','PA','RI','SC','SD','TN','TX',
-                                                'UT','VA','VT','WA','WI','WV','WY'
+                                                'AA', 'AE', 'AK','AL','AP', 'AR', 'AS','AZ','CA','CO','CT','DC','DE','FL','FM','GA','GU',
+                                                'HI','IA','ID','IL','IN','KS','KY','LA','MA','MD','ME','MH',
+                                                'MI','MN','MO','MP','MS','MT','NC','ND','NE','NH','NJ','NM',
+                                                'NV','NY','OH','OK','OR','PA','PR','PW','RI','SC','SD','TN','TX',
+                                                'UT','VA','VI','VT','WA','WI','WV','WY'
                                               )
                                          THEN 'US'
                                          ELSE 'ER' END
                                END AS s_country_origin,
-                          CASE WHEN zip_code IS NOT NULL 
+                          CASE WHEN zip_code IS NOT NULL
                                THEN zip_code
                                ELSE nvl((     -- As a last resort, pull the first applicable zip code.
                                           SELECT MIN(spraddr_zip)
@@ -515,28 +476,28 @@ select *
                                           WHERE  spraddr_pidm = s_pidm
                                           AND    REGEXP_LIKE(spraddr_zip, '^[[:digit:]]+$')
                                         ),'00000')
-                               END AS s_cur_zip_code                           
-                   FROM   ( 
+                               END AS s_cur_zip_code
+                   FROM   (
                             SELECT s_pidm,
-                                   CASE WHEN sabsupl_rowid IS NOT NULL 
+                                   CASE WHEN sabsupl_rowid IS NOT NULL
                                              THEN 'UT'||supl.cnty_code
                                         WHEN spraddr_rowid IS NOT NULL
                                              THEN 'UT'||addr.cnty_code
-                                        WHEN nvl(supl.natn_code,addr.natn_code) <> 'US' 
+                                        WHEN nvl(supl.natn_code,addr.natn_code) <> 'US'
                                              THEN 'UT097'
-                                        WHEN nvl(supl.natn_code,addr.natn_code)  = 'US' 
+                                        WHEN nvl(supl.natn_code,addr.natn_code)  = 'US'
                                          AND nvl(supl.stat_code,addr.stat_code) <> 'UT'
                                              THEN 'UT099'
                                              ELSE 'ERROR'
                                              END AS cnty_code,
-                                   nvl(supl.stat_code,addr.stat_code) AS stat_code,                               
+                                   nvl(supl.stat_code,addr.stat_code) AS stat_code,
                                    CASE WHEN nvl(supl.natn_code,addr.natn_code) IS NULL
                                              THEN CASE WHEN nvl(supl.cnty_code,addr.cnty_code) = '053'
                                                         AND nvl(supl.stat_code,addr.stat_code) = 'UT'
                                                             THEN 'US'
                                                        END
                                              ELSE nvl(supl.natn_code,addr.natn_code)
-                                         END  AS natn_code, 
+                                         END  AS natn_code,
                                    addr.zip_code AS zip_code
                             FROM   students,
                                    (
@@ -563,29 +524,29 @@ select *
                             AND    s_pidm = addr.pidm (+)
                           )
                  ) addr,
-                 ( 
-                   WITH ssid_list AS 
+                 (
+                   WITH ssid_list AS
                    (
                      SELECT goradid_pidm                     AS inner_pidm,
                             substr(goradid_additional_id,-7) AS s_ssid,
                             row_number() OVER (PARTITION BY goradid_pidm ORDER BY goradid_activity_date DESC) rn
-                     FROM   students, goradid       
+                     FROM   students, goradid
                      WHERE  s_pidm = goradid_pidm (+)
-                     AND    goradid_adid_code = 'SSID' 
+                     AND    goradid_adid_code = 'SSID'
                      AND    trim(TRANSLATE(goradid_additional_id, '0123456789', ' ')) is null
                      AND    LENGTH(goradid_additional_id) BETWEEN 7 AND 9
                      AND    goradid_additional_id NOT LIKE '%*%'
                      AND    goradid_additional_id NOT LIKE '%.%'
                      AND    substr(substr(goradid_additional_id,-7),1,1) BETWEEN 1 AND 2
-                   ) 
-                -- Students can have more than one SSID, so use activity date to get the most recent one. 
-                   SELECT inner_pidm, s_ssid 
-                   FROM   ssid_list 
-                   WHERE  rn = 1                          
+                   )
+                -- Students can have more than one SSID, so use activity date to get the most recent one.
+                   SELECT inner_pidm, s_ssid
+                   FROM   ssid_list
+                   WHERE  rn = 1
                  ) adid,
-                 ( 
+                 (
                    SELECT rpratrm_pidm AS inner_pidm,
-                          round(sum(rpratrm_paid_amt) / max(hb75_minus), 2) * -100 AS s_hb75_waiver 
+                          round(sum(rpratrm_paid_amt) / max(hb75_minus), 2) * -100 AS s_hb75_waiver
                      FROM rpratrm, students,
                           (SELECT  SUM((SELECT MAX (sfrrgfe_per_cred_charge)
                              FROM sfrrgfe
@@ -606,24 +567,24 @@ select *
                           AND sfrrgfe_camp_code IS NULL))*12  AS hb75_minus
                     FROM DUAL)
                    WHERE s_pidm = rpratrm_pidm (+)
-                     AND rpratrm_term_code = s_banner_term  
+                     AND rpratrm_term_code = s_banner_term
                      AND rpratrm_fund_code IN ('82010','82011','82012','82013','82016','82017')
                      AND rpratrm_paid_amt > 0
                 GROUP BY rpratrm_pidm
                  ) atrm,
                  (
                    SELECT shrlgpa_pidm                AS inner_pidm,
-                          round(nvl(sum(CASE WHEN shrlgpa_levl_code IN ('NC','UG') 
+                          round(nvl(sum(CASE WHEN shrlgpa_levl_code IN ('NC','UG')
                                              THEN shrlgpa_hours_earned END
                                        ) * 10, 0), 0) AS s_cum_hrs_ugrad,
-                          round(nvl(sum(CASE WHEN shrlgpa_levl_code = 'GR' 
+                          round(nvl(sum(CASE WHEN shrlgpa_levl_code = 'GR'
                                              THEN shrlgpa_hours_earned END
                                        ) * 10, 0), 0) AS s_cum_hrs_grad,
-                          round(nvl(sum(CASE WHEN  shrlgpa_levl_code IN ('NC','UG') 
-                                             THEN  shrlgpa_quality_points / shrlgpa_gpa_hours END 
+                          round(nvl(sum(CASE WHEN  shrlgpa_levl_code IN ('NC','UG')
+                                             THEN  shrlgpa_quality_points / shrlgpa_gpa_hours END
                                        ) * 1000,0),0) AS s_cum_gpa_ugrad,
-                          round(nvl(sum(CASE WHEN  shrlgpa_levl_code  = 'GR' 
-                                             THEN  shrlgpa_quality_points / shrlgpa_gpa_hours END 
+                          round(nvl(sum(CASE WHEN  shrlgpa_levl_code  = 'GR'
+                                             THEN  shrlgpa_quality_points / shrlgpa_gpa_hours END
                                        ) * 1000,0),0) AS s_cum_gpa_grad
                    FROM   students, shrlgpa
                    WHERE  s_pidm = shrlgpa_pidm (+)
@@ -641,30 +602,30 @@ select *
                    GROUP  BY swvgrde_pidm
                  ) grde,
                  (
-                   SELECT s_pidm                 AS inner_pidm, 
+                   SELECT s_pidm                 AS inner_pidm,
                           gurhlog_previous_value AS s_prev_id
                    FROM   students, gurhlog g1
-                   WHERE  gurhlog_pidm||gurhlog_previous_value 
+                   WHERE  gurhlog_pidm||gurhlog_previous_value
                           <> gurhlog_pidm||gurhlog_current_value
                    AND    gurhlog_pidm = s_pidm
-                   AND    gurhlog_previous_value 
+                   AND    gurhlog_previous_value
                           NOT IN ('000000000','00000000','0000000','000000',
                                   '00000','0000','000','00','0','`')
                    AND    gurhlog_activity_date =
                           (
-                            SELECT MAX(g2.gurhlog_activity_date) 
+                            SELECT MAX(g2.gurhlog_activity_date)
                             FROM   gurhlog g2, spbpers
                             WHERE  g2.gurhlog_pidm = g1.gurhlog_pidm
                             AND    g2.gurhlog_pidm = spbpers_pidm
-                            AND    g2.gurhlog_previous_value 
+                            AND    g2.gurhlog_previous_value
                                    NOT IN ('000000000','00000000','0000000','000000',
                                            '00000','0000','000','00','0')
                             AND    g2.gurhlog_previous_value IS NOT NULL
                             AND    g2.gurhlog_key = 'SPBPERS_SSN'
                             AND    g2.gurhlog_current_value = spbpers_ssn
-                            AND    g2.gurhlog_pidm||g2.gurhlog_previous_value 
+                            AND    g2.gurhlog_pidm||g2.gurhlog_previous_value
                                    <> g2.gurhlog_pidm||g2.gurhlog_current_value
-                          )          
+                          )
                  ) hlog,
                  (     -- Pull High School Information from SORHSCH, HSGPACT, and GORADID
                    SELECT DISTINCT
@@ -685,31 +646,31 @@ select *
                                ELSE sorhsch_sbgi_code END              AS s_high_school,
                           to_char(sorhsch_graduation_date, 'YYYYMMDD') AS s_hsgrad_dt,
                           to_number(trunc(sorhsch_gpa,3))              AS s_hsgpa
-                   FROM   students, 
+                   FROM   students,
                           sorhsch
                    WHERE  s_pidm = sorhsch_pidm (+)
                    AND    sorhsch.ROWID = dsc.f_get_sorhsch_rowid(s_pidm)
-                          
+
                  ) hsch,
                  (
                    SELECT hsgpact_pidm    AS inner_pidm,
                           hsgpact_hsgpact AS s_index_score
-                   FROM   students, dsc.hsgpact       
+                   FROM   students, dsc.hsgpact
                    WHERE  s_pidm = hsgpact_pidm (+)
                  ) indx,
                  (
                    SELECT s_pidm          AS inner_pidm,
                           prgm1.prgm_code AS s_cur_prgm1,
-                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code 
-                               THEN prgm2.prgm_code 
+                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code
+                               THEN prgm2.prgm_code
                                END        AS s_cur_prgm2,
                           prgm1.degc_code AS s_cur_degc1,
-                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code 
+                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code
                                THEN prgm2.degc_code
                                END        AS s_cur_degc2,
                           majr1.majr_code AS s_cur_majr1,
-                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code 
-                               THEN majr2.majr_code 
+                          CASE WHEN prgm1.prgm_code <> prgm2.prgm_code
+                               THEN majr2.majr_code
                                END        AS s_cur_majr2,
                           nvl(prgm1.cur_cip1,'999999')
                                           AS s_cur_cip1,
@@ -718,10 +679,10 @@ select *
                           cur_conc2       AS s_cur_conc2
                    FROM   students,
                           (     -- 1st Major
-                            SELECT sgvacur_pidm, 
-                                   CASE WHEN sgbstdn_levl_code = 'CE' 
+                            SELECT sgvacur_pidm,
+                                   CASE WHEN sgbstdn_levl_code = 'CE'
                                         THEN 'CE'
-                                        ELSE sgvacur_majr_code_1 
+                                        ELSE sgvacur_majr_code_1
                                         END AS majr_code,
                                    sgvacur_majr_code_conc_1 AS cur_conc1,
                                    sgvacur_majr_code_conc_2 AS cur_conc2
@@ -740,7 +701,7 @@ select *
                                    )
                           ) majr1,
                           (     -- 2nd Major
-                            SELECT sgvacur_pidm, 
+                            SELECT sgvacur_pidm,
                                    sgvacur_majr_code_1 AS majr_code
                             FROM   students, sgvacur, sgbstdn s1
                             WHERE  sgvacur_pidm          = s_pidm
@@ -758,13 +719,13 @@ select *
                           ) majr2,
                           (     -- 1st Program
                             SELECT sgvccur_pidm,
-                                   CASE WHEN sgbstdn_levl_code = 'CE' 
-                                        THEN 'ND'  
-                                        ELSE sgvccur_degc_code 
+                                   CASE WHEN sgbstdn_levl_code = 'CE'
+                                        THEN 'ND'
+                                        ELSE sgvccur_degc_code
                                         END  AS degc_code,
-                                   CASE WHEN sgbstdn_levl_code = 'CE' 
-                                        THEN 'ND-CE'    
-                                        ELSE sgvccur_program   
+                                   CASE WHEN sgbstdn_levl_code = 'CE'
+                                        THEN 'ND-CE'
+                                        ELSE sgvccur_program
                                         END  AS prgm_code,
                                    cipc_code AS cur_cip1
                             FROM   students, dsc_programs_current, sgvccur, sgbstdn s1
@@ -782,7 +743,7 @@ select *
                                      AND    s2.sgbstdn_term_code_eff <= s_banner_term
                                    )
                           ) prgm1,
-                          (     -- 2nd Program   
+                          (     -- 2nd Program
                             SELECT sgvccur_pidm,
                                    sgvccur_degc_code AS degc_code,
                                    sgvccur_program   AS prgm_code,
@@ -804,8 +765,8 @@ select *
                           ) prgm2
                    WHERE s_pidm = majr1.sgvacur_pidm
                    AND   s_pidm = majr2.sgvacur_pidm (+)
-                   AND   s_pidm = prgm1.sgvccur_pidm  
-                   AND   s_pidm = prgm2.sgvccur_pidm (+)  
+                   AND   s_pidm = prgm1.sgvccur_pidm
+                   AND   s_pidm = prgm2.sgvccur_pidm (+)
                  ) majr,
                  (
                    SELECT sprmedi_pidm           AS inner_pidm,
@@ -817,7 +778,7 @@ select *
                    GROUP  BY sprmedi_pidm
                  ) medi,
                  (
-                   SELECT s_pidm AS inner_pidm,                  
+                   SELECT s_pidm AS inner_pidm,
                           (
                             SELECT sorlfos_majr_code
                             FROM   sorlfos s1
@@ -829,8 +790,8 @@ select *
                                      WHERE  s2.sorlfos_pidm      = s_pidm
                                      AND    s2.sorlfos_cact_code = 'ACTIVE'
                                      AND    s2.sorlfos_lfst_code = 'MINOR'
-                                   )   
-                            AND    ROWNUM = 1 
+                                   )
+                            AND    ROWNUM = 1
                           ) AS s_cur_minr1,
                           (
                             SELECT sorlfos_majr_code
@@ -843,15 +804,15 @@ select *
                                      WHERE  s2.sorlfos_pidm      = s_pidm
                                      AND    s2.sorlfos_cact_code = 'ACTIVE'
                                      AND    s2.sorlfos_lfst_code = 'MINOR'
-                                   )     
-                            AND    ROWNUM = 2 
+                                   )
+                            AND    ROWNUM = 2
                           ) AS s_cur_minr2
                    FROM   students
                  ) minr,
                  (
                    SELECT s_pidm AS inner_pidm,
-                          CASE WHEN s_pidm IN 
-                          (            
+                          CASE WHEN s_pidm IN
+                          (
                             SELECT tbraccd_pidm
                             FROM   tbraccd
                             WHERE  tbraccd_term_code   = (SELECT DISTINCT s_banner_term FROM students)
@@ -865,16 +826,16 @@ select *
                             FROM   rpratrm
                             WHERE  rpratrm_term_code  = (SELECT DISTINCT s_banner_term FROM students)
                             AND    rpratrm_offer_amt  > 0
-                            AND    rpratrm_fund_code IN ('FPELL','FPELL1')  
+                            AND    rpratrm_fund_code IN ('FPELL','FPELL1')
                           )
                           THEN 'E'
                           END AS s_pell
                    FROM   students
-                 ) pell,  
+                 ) pell,
                  (     -- Pull personal data from SPBPERS and SPRIDEN
                    SELECT spbpers_pidm AS inner_pidm,
-                          CASE WHEN spbpers_citz_code = 2 THEN spriden_id
-                               ELSE CASE WHEN NOT 
+                          CASE WHEN spbpers_citz_code = 2 THEN 'D' || spriden_id
+                               ELSE CASE WHEN NOT
                                     (
                                          (substr(spbpers_ssn,0,2) != '00' AND substr(spbpers_ssn,4,2) = '00') -- dummy ID
                                       OR  substr(spbpers_ssn,0,1)  = '9'                                      -- dummy ID
@@ -890,14 +851,14 @@ select *
                                       OR  spbpers_ssn LIKE '%[a-z]%'                                          -- contains nondigit
                                     )
                                     THEN trim(spbpers_ssn)
-                                    ELSE spriden_id END END      AS s_id,
+                                    ELSE 'D' || spriden_id END END      AS s_id,
                           spbpers_sex                            AS s_gender,
-                          CASE WHEN upper(REPLACE(substr(spbpers_name_suffix, 1, 4),'.','')) 
+                          CASE WHEN upper(REPLACE(substr(spbpers_name_suffix, 1, 4),'.',''))
                                     NOT IN ('BAP','CAP','ESQ','MD','NA','JL','TY','JDB','MJE','E','ANM')
-                               THEN REPLACE(substr(spbpers_name_suffix, 1, 4),'.','') 
+                               THEN REPLACE(substr(spbpers_name_suffix, 1, 4),'.','')
                                END                               AS s_suffix,
                           CASE WHEN f_calculate_age(stvterm_start_date, spbpers_birth_date, spbpers_dead_date) > 100
-                               THEN to_char(to_date(to_char(spbpers_birth_date,'DD-MON-RR')),'YYYYMMDD') 
+                               THEN to_char(to_date(to_char(spbpers_birth_date,'DD-MON-RR')),'YYYYMMDD')
                                ELSE to_char(spbpers_birth_date,'YYYYMMDD')
                                END                               AS s_birth_dt,
                           s_citz_code,
@@ -911,7 +872,7 @@ select *
                                -- 4.) New Race Multiple ------------------------
                                WHEN LENGTH(all_race_codes)    > '1' THEN '2'
                                -- 5.) New Race Code ----------------------------
-                               ELSE nvl( 
+                               ELSE nvl(
                                     all_race_codes,
                                -- 6.) Old Race Code ----------------------------
                                     nvl(
@@ -928,15 +889,15 @@ select *
                           CASE WHEN spbpers_dead_ind = 'Y' THEN 'D'
                                ELSE nvl(spbpers_confid_ind,'N')
                                END AS s_confid_ind
-                   FROM   students, spbpers, stvterm, spriden,                  
+                   FROM   students, spbpers, stvterm, spriden,
                           (     -- Load all Race Codes into a single field to save work in final query
                             SELECT gorprac_pidm,
-                                   LISTAGG(gorprac_race_cde,'') 
+                                   LISTAGG(gorprac_race_cde,'')
                                            WITHIN GROUP (ORDER BY gorprac_race_cde) AS all_race_codes
-                            FROM   students, gorprac 
+                            FROM   students, gorprac
                             WHERE  s_pidm = gorprac_pidm (+)
                             GROUP  BY gorprac_pidm
-                          )                 
+                          )
                    WHERE  s_pidm = spbpers_pidm
                    AND    s_pidm = spriden_pidm
                    AND    s_pidm = gorprac_pidm (+)
@@ -945,11 +906,11 @@ select *
                  ) pers,
                  (     -- Pull previous SPRIDEN record information
                    SELECT spriden_pidm                       AS inner_pidm,
-                          spriden_last_name                  AS s_prev_last, 
+                          spriden_last_name                  AS s_prev_last,
                           substr(s1.spriden_first_name,1,15) AS s_prev_first,
-                          substr(s1.spriden_mi,1,15)         AS s_prev_middle 
+                          substr(s1.spriden_mi,1,15)         AS s_prev_middle
                    FROM   students i LEFT JOIN spriden s1 ON spriden_pidm = s_pidm
-                   WHERE  s1.spriden_last_name||s1.spriden_first_name||s1.spriden_mi 
+                   WHERE  s1.spriden_last_name||s1.spriden_first_name||s1.spriden_mi
                           <> s_last_name||s_first_name||s_middle_name
                    AND    ROWNUM = 1 -- only grab one previous record. Add logic to choose best prev record?
                  ) prev,
@@ -962,9 +923,9 @@ select *
                             WHERE  tbraccd_pidm        = s_pidm
                             AND    tbraccd_term_code   = s_banner_term
                             AND    tbraccd_detail_code = '8933'
-                            AND    tbraccd_amount     <> 0    
-                          ) 
-                          THEN 'B' 
+                            AND    tbraccd_amount     <> 0
+                          )
+                          THEN 'B'
                           END AS s_bia
                    FROM   students
                  ) sbia,
@@ -988,11 +949,11 @@ select *
                    AND    sfrstcr_rsts_code      = stvrsts_code
                    AND    ssbsect_ssts_code      = 'A'
                    AND    ssbsect_camp_code     != 'XXX'
-                   AND    stvrsts_incl_sect_enrl = 'Y' 
+                   AND    stvrsts_incl_sect_enrl = 'Y'
                    GROUP  BY sfrstcr_pidm
                  ) stcr,
                  (     -- Application Student Type Code taken from SGBSTDN
-                   SELECT sgbstdn_pidm      AS inner_pidm, 
+                   SELECT sgbstdn_pidm      AS inner_pidm,
                           sgbstdn_styp_code AS s_styp,
                           REPLACE(sgbstdn_levl_code,'CE','UG')
                                             AS levl_code,
@@ -1004,7 +965,7 @@ select *
                                END          AS s_regent_res
                    FROM   students, sgbstdn s1
                    WHERE  sgbstdn_pidm = s_pidm
-                   AND    sgbstdn_term_code_eff = 
+                   AND    sgbstdn_term_code_eff =
                           (     -- Find most-recent applicable term code
                             SELECT MAX(s2.sgbstdn_term_code_eff)
                             FROM   sgbstdn s2
@@ -1012,7 +973,7 @@ select *
                             AND    s2.sgbstdn_term_code_eff <= s_banner_term
                           )
                  ) stdn,
-                 ( 
+                 (
                    SELECT sortest_pidm AS inner_pidm,
                           act_comp     AS s_act_comp,
                           act_engl     AS s_act_engl,
@@ -1030,24 +991,24 @@ select *
                                           'A05' ,'act_comp',
                                           sortest_tesc_code) AS tesc_code,
                                    sortest_test_score AS test_score,
-                                   row_number() OVER (PARTITION BY sortest_pidm, sortest_tesc_code 
+                                   row_number() OVER (PARTITION BY sortest_pidm, sortest_tesc_code
                                                       ORDER BY sortest_test_score DESC) AS rn
                             FROM   students, sortest
                             WHERE  s_pidm = sortest_pidm (+)
-                            AND    sortest_equiv_ind = 'N' 
+                            AND    sortest_equiv_ind = 'N'
                             AND    sortest_tesc_code IN ('A05','A02','A02N','A01','A03','A04')
-                          )   
+                          )
                    PIVOT  ( max(test_score) FOR tesc_code
                             IN ('act_comp' AS act_comp,
                                 'act_engl' AS act_engl,
                                 'act_math' AS act_math,
                                 'act_read' AS act_read,
-                                'act_sci'  AS act_sci))    
-                   WHERE rn = 1                                      
+                                'act_sci'  AS act_sci))
+                   WHERE rn = 1
                  ) tesc,
-                 ( 
+                 (
                    SELECT shrtgpa_pidm AS inner_pidm,
-                          round(sum(shrtgpa_quality_points) / sum(shrtgpa_gpa_hours), 3) * 1000 
+                          round(sum(shrtgpa_quality_points) / sum(shrtgpa_gpa_hours), 3) * 1000
                                        AS s_term_gpa
                    FROM   students, shrtgpa
                    WHERE  s_pidm                 = shrtgpa_pidm (+)
@@ -1079,7 +1040,7 @@ select *
                            AND    shrtgpa_trit_seq_no  = shrtrit_seq_no
                            AND    shrtgpa_gpa_type_ind = 'T'
                           )
-                   GROUP  BY shrtgpa_pidm 
+                   GROUP  BY shrtgpa_pidm
                  ) tran,
                  (
                    SELECT gorvisa_pidm      AS inner_pidm,
@@ -1109,7 +1070,7 @@ select *
           AND    students.s_pidm = majr.inner_pidm (+)
           AND    students.s_pidm = medi.inner_pidm (+)
           AND    students.s_pidm = minr.inner_pidm (+)
-          AND    students.s_pidm = pell.inner_pidm (+) 
+          AND    students.s_pidm = pell.inner_pidm (+)
           AND    students.s_pidm = pers.inner_pidm (+)
           AND    students.s_pidm = prev.inner_pidm (+)
           AND    students.s_pidm = sbia.inner_pidm (+)
@@ -1119,10 +1080,12 @@ select *
           AND    students.s_pidm = tesc.inner_pidm (+)
           AND    students.s_pidm = tgpa.inner_pidm (+)
           AND    students.s_pidm = tran.inner_pidm (+)
-          AND    students.s_pidm = visa.inner_pidm (+) 
+          AND    students.s_pidm = visa.inner_pidm (+)
         );
 
- COMMIT;       
+ COMMIT;
+
+
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------       
@@ -1727,5 +1690,68 @@ select *
            WHERE  sc_pidm = grde.inner_pidm (+)
            AND    sc_crn  = grde.inner_crn  (+)
          );
+
+COMMIT;
+
+/* Manual Fixes
+   These students were already assigned a previous cohort
+*/
+UPDATE students_current
+SET s_entry_action = 'CS'
+WHERE s_pidm IN ('273496','289096');
+UPDATE students_current
+SET s_entry_action = 'RS'
+WHERE s_pidm IN ('144595');
+
+UPDATE students_current
+SET s_entry_action = 'CG'
+WHERE s_pidm = '76101';
+
+UPDATE students_current
+SET s_state_origin = 'UT', s_county_origin = 'UT053'
+WHERE s_banner_id IN (
+'D00042810',
+'D00041511',
+'D00427966',
+'D00070135');
+
+UPDATE students_current
+SET s_state_origin = 'UN'
+WHERE s_banner_id = 'D00037836';
+
+UPDATE students_current
+SET s_state_origin = 'AP'
+WHERE s_banner_id = 'D00427966';
+
+UPDATE students_current
+SET s_country_origin = 'US'
+WHERE s_banner_id IN (
+'D00315526',
+'D00363726',
+'D00327938',
+'D00415110',
+'D00414209',
+'D00393891');
+
+UPDATE students_current
+SET s_id_flag = CASE WHEN s_id LIKE 'D%' THEN 'I' ELSE 'S' END;
+
+UPDATE students_current
+SET s_county_origin = 'UT030'
+WHERE s_banner_id = 'D00427966';
+
+UPDATE students_current
+SET s_county_origin = 'UT053'
+WHERE s_banner_id;
+
+UPDATE students_current
+SET s_county_origin = 'UT099'
+WHERE s_banner_id IN ('D00327938',
+'D00393891',
+'D00315526',
+'D00363726',
+'D00415110',
+'D00414209'
+);
 
 COMMIT;

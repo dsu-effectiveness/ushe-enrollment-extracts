@@ -29,7 +29,7 @@
             s_prev_suffix,
             CASE WHEN REGEXP_LIKE(s_cur_zip_code, '^[[:digit:]]+$') 
                  THEN rpad(replace(s_cur_zip_code,'-',''),5,'0')
-                 ELSE '0000000000' END AS s_cur_zip,
+                 ELSE '000000000' END AS s_cur_zip,
             s_citz_code,
             s_county_origin,
             s_state_origin,

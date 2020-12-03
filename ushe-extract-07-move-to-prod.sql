@@ -1,29 +1,28 @@
-    
     /* --- RUN IN PROD ----------------------------------------------------------------------------------------------------- */
-    DROP TABLE students_20202E;
-    DROP TABLE course_20202E;
-    DROP TABLE student_course_20202E;
+    DROP TABLE students_202043;
+    DROP TABLE course_202043;
+    DROP TABLE student_course_202043;
     
-    CREATE TABLE students_20202E       AS SELECT * FROM students_20192e;
-    CREATE TABLE course_20202E         AS SELECT * FROM course_20192e;
-    CREATE TABLE student_course_20202E AS SELECT * FROM student_course_20192e;
-    ALTER TABLE course_20202E MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
+    CREATE TABLE students_202043       AS SELECT * FROM students_20192e;
+    CREATE TABLE course_202043         AS SELECT * FROM course_20192e;
+    CREATE TABLE student_course_202043 AS SELECT * FROM student_course_20192e;
+    ALTER TABLE course_202043 MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
 
-    TRUNCATE TABLE students_20202E;
-    TRUNCATE TABLE course_20202E;
-    TRUNCATE TABLE student_course_20202E;
+    TRUNCATE TABLE students_202043;
+    TRUNCATE TABLE course_202043;
+    TRUNCATE TABLE student_course_202043;
 
     /* --- RUN IN IR1 or IR2 ------------------------------------------------------------------------------------------------------ */
 
-    INSERT INTO students_20202E@proddb.dixie.edu
+    INSERT INTO students_202043@proddb.dixie.edu
     SELECT s_pidm AS pidm,
-           s_banner_id,
+           SUBSTR(s_banner_id,2,8) AS s_banner_id,
            s_banner_term AS TERM,
            s_inst,
            s_year,
            s_term,
            s_extract,
-           s_id,
+           CASE WHEN s_id_flag = 'I' THEN  SUBSTR(s_id,2,8) ELSE s_id END AS s_id,
            s_id_flag,
            s_prev_id,
            s_last_name AS s_last,
@@ -112,7 +111,7 @@
     FROM   students_current;
     COMMIT;
     
-    INSERT INTO course_20202E@proddb.dixie.edu
+    INSERT INTO course_202043@proddb.dixie.edu
     SELECT c_crn AS crn,
            c_banner_term AS TERM,
            c_inst,
@@ -191,7 +190,7 @@
     FROM   courses_current;
     COMMIT;
     
-    INSERT INTO student_course_20202E@proddb.dixie.edu
+    INSERT INTO student_course_202043@proddb.dixie.edu
     SELECT sc_pidm AS pidm,
            sc_id AS ID,
            sc_banner_term AS TERM,
@@ -224,7 +223,7 @@
     SELECT s_cur_prgm1, s_major_desc1, COUNT(*) AS students FROM students_current WHERE s_level = 'GG' GROUP BY s_cur_prgm1, s_major_desc1 ORDER BY s_cur_prgm1;
     */
     
---    select * from students_20202E
---    select * from course_20202E
---    select * from student_course_20202E
+--    select * from students_202043
+--    select * from course_202043
+--    select * from student_course_202043
     
