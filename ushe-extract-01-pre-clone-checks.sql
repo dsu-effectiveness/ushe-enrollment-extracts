@@ -1501,7 +1501,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     )              AS xfer_credits,
                     'Check Entry Action Change' 
                                    AS reason
-             FROM   students_201523 s, -- update each term
+             FROM   students_202043 s, -- update each term
                     dailystats d,
                     spriden
              WHERE  d.pidm = s.pidm
@@ -1537,7 +1537,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     )              AS xfer_credits,
                     'Check Entry Action Change' 
                                    AS reason
-             FROM   students_20204E s, -- update each term
+             FROM   students_202043 s, -- update each term
                     dailystats d,
                     spriden
              WHERE  d.pidm  = s.pidm
