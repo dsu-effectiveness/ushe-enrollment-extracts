@@ -10,7 +10,7 @@
     p_extract       VARCHAR2(1)
   );
   
-  INSERT INTO extract_parameters VALUES ('202043','202040','2021','2021','2','3');
+  INSERT INTO extract_parameters VALUES ('20204E','202040','2021','2021','2','E');
 */
 
 select *
@@ -431,7 +431,7 @@ select *
           FROM   students, --<-- Created in the WITH statement above
                  ( /**/
                    SELECT s_pidm          AS inner_pidm,
-                          CASE WHEN natn_code != 'US' AND stat_code != 'UT'
+                          CASE WHEN natn_code != 'US' AND stat_code NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI', 'UT')
                                     THEN 'UT097'
                                WHEN stat_code != 'UT'
                                     THEN 'UT099'
@@ -455,7 +455,7 @@ select *
                                          THEN 'XX'
                                          ELSE 'ER' END
                                END AS s_state_origin,
-                          CASE WHEN natn_code IS NOT NULL
+                          CASE WHEN natn_code IS NOT NULL AND sabsupl_stat_code_admit NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI')
                                     THEN (SELECT iso_code FROM country_iso WHERE fips_code = natn_code)
                                ELSE CASE WHEN stat_code IN
                                               (
@@ -524,6 +524,8 @@ select *
                             AND    s_pidm = addr.pidm (+)
                           )
                  ) addr,
+
+
                  (
                    WITH ssid_list AS
                    (
@@ -550,7 +552,7 @@ select *
                      FROM rpratrm, students,
                           (SELECT  SUM((SELECT MAX (sfrrgfe_per_cred_charge)
                              FROM sfrrgfe
-                            WHERE sfrrgfe_term_code = '202020'
+                            WHERE sfrrgfe_term_code = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                               AND sfrrgfe_from_flat_hrs = 12
                               AND sfrrgfe_resd_code = 'R'
                               AND sfrrgfe_detl_code IN ('1001', '1002')
@@ -558,7 +560,7 @@ select *
                               AND sfrrgfe_rate_code IS NULL)
                 - (SELECT MAX (sfrrgfe_per_cred_charge)
                          FROM sfrrgfe
-                        WHERE sfrrgfe_term_code = '202020'
+                        WHERE sfrrgfe_term_code = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                           AND sfrrgfe_from_flat_hrs = 12
                           AND sfrrgfe_resd_code = 'N'
                           AND sfrrgfe_detl_code IN ('1200', '1201')
