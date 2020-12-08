@@ -1480,37 +1480,22 @@
           substr(label,instr(label,'-')+1,LENGTH(label)-instr(label,'-'));
 
  ----------------------------------------------------------------------------------------------------
+ -- Internal Error Checks
  ----------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------- 
---  Visa Errors
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is not null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code = '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code not in ('2', '3') and s_visatype is not null
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code = '2' and s_visatype is null and s_ethnic <> 'N'
+ ----------------------------------------------------------------------------------------------------
+/* HB75_Waiver:
+   Checks to see if there are negative or over 125% */
+   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term
+   FROM ENROLL.students_current
+   WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125);
 
---Online Errors
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section like '4%' and C_Delivery_Method <> 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section not like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section not like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section not like '4%' and C_Delivery_Method <> 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section like '4%' and C_Delivery_Method <> 'I'
+/* Graduate GPA:
+   Checks to see if Graduate GPA is zero
+ */
+   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_cum_gpa_grad, s_entry_action, s_banner_term
+   FROM ENROLL.students_current
+   WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG');
 
-  -- COMMIT; select ( 
-  
- -- SELECT * FROM students_current where s_banner_id = '00398842'; select * from spbpers where spbpers_pidm = 274310
- -- SELECT * FROM courses_current@proddb where c_crn = 43474;
  -- SELECT * FROM student_courses_current;
-
--- select f_calculate_age(stvterm_start_date, spbpers_birth_date, spbpers_dead_date) as calc_age, to_char(spbpers_birth_date,'YYYYMMDD') AS to_char_date, spbpers.* FROM spbpers, stvterm where stvterm_code = '201840' AND spbpers_pidm = '274310'
-
--- SELECT * FROM students_current where s_entry_action in ('FF', 'FH', 'TU');
--- SELECT * FROM students_current where s_entry_action in ('FF', 'FH', 'TU') and s_ethnic = 'N'
-
-select * from students_current where s_banner_id in ('00433848', '00434486', '00415580', '00205890', '00260843')
-select * from students_current where s_id = '647746723'
-
 
 -- end of file
