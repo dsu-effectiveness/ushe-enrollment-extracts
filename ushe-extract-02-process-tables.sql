@@ -455,7 +455,7 @@ select *
                                          THEN 'XX'
                                          ELSE 'ER' END
                                END AS s_state_origin,
-                          CASE WHEN natn_code IS NOT NULL AND sabsupl_stat_code_admit NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI')
+                          CASE WHEN natn_code IS NOT NULL AND stat_code NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI')
                                     THEN (SELECT iso_code FROM country_iso WHERE fips_code = natn_code)
                                ELSE CASE WHEN stat_code IN
                                               (
@@ -1442,7 +1442,7 @@ select *
                           coll_code                            AS c_college,
                           dept_code                            AS c_dept,
                           levl_code1                           AS c_crs_level,
-                          CASE WHEN camp_code IN ('AC1','AU1')  THEN 'A01'
+                          CASE WHEN camp_code IN ('AC1','AU1', 'ACE')  THEN 'A01'
                                WHEN camp_code = 'B8C'           THEN 'B80'
                                WHEN camp_code = 'UOS'           THEN 'C'
                                WHEN camp_code IN ('OU1', 'V01') THEN 'O01'
@@ -1692,68 +1692,5 @@ select *
            WHERE  sc_pidm = grde.inner_pidm (+)
            AND    sc_crn  = grde.inner_crn  (+)
          );
-
-COMMIT;
-
-/* Manual Fixes
-   These students were already assigned a previous cohort
-*/
-UPDATE students_current
-SET s_entry_action = 'CS'
-WHERE s_pidm IN ('273496','289096');
-UPDATE students_current
-SET s_entry_action = 'RS'
-WHERE s_pidm IN ('144595');
-
-UPDATE students_current
-SET s_entry_action = 'CG'
-WHERE s_pidm = '76101';
-
-UPDATE students_current
-SET s_state_origin = 'UT', s_county_origin = 'UT053'
-WHERE s_banner_id IN (
-'D00042810',
-'D00041511',
-'D00427966',
-'D00070135');
-
-UPDATE students_current
-SET s_state_origin = 'UN'
-WHERE s_banner_id = 'D00037836';
-
-UPDATE students_current
-SET s_state_origin = 'AP'
-WHERE s_banner_id = 'D00427966';
-
-UPDATE students_current
-SET s_country_origin = 'US'
-WHERE s_banner_id IN (
-'D00315526',
-'D00363726',
-'D00327938',
-'D00415110',
-'D00414209',
-'D00393891');
-
-UPDATE students_current
-SET s_id_flag = CASE WHEN s_id LIKE 'D%' THEN 'I' ELSE 'S' END;
-
-UPDATE students_current
-SET s_county_origin = 'UT030'
-WHERE s_banner_id = 'D00427966';
-
-UPDATE students_current
-SET s_county_origin = 'UT053'
-WHERE s_banner_id;
-
-UPDATE students_current
-SET s_county_origin = 'UT099'
-WHERE s_banner_id IN ('D00327938',
-'D00393891',
-'D00315526',
-'D00363726',
-'D00415110',
-'D00414209'
-);
 
 COMMIT;
