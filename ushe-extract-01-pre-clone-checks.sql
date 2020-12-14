@@ -956,10 +956,10 @@
                              AS reason
              FROM   dailystats,
                     spriden
-             WHERE  styp != 'P'
+             WHERE  styp NOT IN ('P', 'H')
              AND    spriden_change_ind IS NULL
              AND    spriden_pidm = pidm
-             AND    cur_prgm IN ('CE-CONC','ND-CE','ND-BADM','ND-ESL')
+             AND    cur_prgm IN ('CE-CONC','ND-CE','ND-ESL')
            );
     --  result(s)
     
@@ -1289,12 +1289,13 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    ssrsccd_term_code  = ssbsect_term_code
              AND    (
                 (ssbsect_camp_code != 'O01' AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code = 'I')
-             OR (ssbsect_camp_code IN ('O01', 'UOS') AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code != 'I' )
-             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code != 'I' )
-             OR (ssbsect_camp_code IN ('O01', 'UOS') AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code = 'I' )
-             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code = 'I' )
-             OR (ssbsect_camp_code != 'O01' AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code = 'I' )
-             OR (ssbsect_camp_code IN ('O01', 'UOS') AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code != 'I' )
+             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code != 'I')
+             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb LIKE '4%' AND ssbsect_insm_code != 'I')
+             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code = 'I')
+             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code = 'I')
+             OR (ssbsect_camp_code NOT IN ('O01', 'UOS') AND ssbsect_insm_code = 'I')
+             OR (ssbsect_camp_code = 'O01' AND ssbsect_seq_numb NOT LIKE '4%' AND ssbsect_insm_code != 'I')
+             OR (ssbsect_camp_code = 'UOS' AND ssbsect_insm_code != 'I')
        ));
 
  ---------------------------------------------------------------------------------------------------
