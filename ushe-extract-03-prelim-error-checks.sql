@@ -64,55 +64,23 @@
     AND    sc_pidm = s_pidm
  	  AND    sc_stud_type  NOT IN ('CC','DC')
 	  AND    c_budget_code IN ('BC','SF')
-    AND    s_high_school != '459500'
- )
- WHERE err_count > 0
- ORDER BY CASE substr(label,1,2)
-               WHEN 'S-' THEN 1
-               WHEN 'C-' THEN 2
-               WHEN 'SC' THEN 3
-                         ELSE 0 END,
-          substr(label,instr(label,'-')+1,LENGTH(label)-instr(label,'-'));
+     AND    s_high_school != '459500'
 
  UNION
 
  -- SC-10b ------------------------------------------------------------------------------------------
- -- Grade - Invalid Concurrent Enrollment Grades 
-
-   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term
+ -- Grade - Invalid Concurrent Enrollment Grades
+    SELECT 'SC-10b' AS label, count(*) AS err_count
+  -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term
    FROM ENROLL.students_current
-   WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125);
+   WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125)
+
+UNION
 
  ----------------------------------------------------------------------------------------------------
  -- Internal Error Checks
  ----------------------------------------------------------------------------------------------------
  ----------------------------------------------------------------------------------------------------
-/* HB75_Waiver:
-   Checks to see if there are negative or over 125% */
- SELECT * FROM
-    (
-
-       -- A-01a --------------------------------------------------------------------------------------------
-       -- Orphaned Records - s_id found in students table but not in student_course table
-       /*
-          SELECT 'A-01a.1' AS label, count(*) AS err_count
-       -- SELECT *
-          FROM   (
-                   SELECT DISTINCT sc_ID FROM student_courses_current
-                   MINUS
-                   SELECT DISTINCT s_id FROM students_current
-                 )
-       UNION
-
-          SELECT 'A-01a.2' AS label, count(*) AS err_count
-       -- SELECT *
-          FROM   (
-                   SELECT DISTINCT s_id FROM students_current
-                   MINUS
-                   SELECT DISTINCT sc_id FROM student_courses_current
-                 )
-       UNION
-       */
        -- A-03a --------------------------------------------------------------------------------------------
        -- Student IDs - s_id found in students table but not in student_course table
 
@@ -476,8 +444,8 @@
 -- S-12c --------------------------------------------------------------------------------------------
 -- Birth date older than 100 years
 
-       --SELECT 'S-12c' AS label, count(*) AS err_count
-        SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_gender, s_ethnic, s_year,  TO_CHAR(SYSDATE, 'YYYY') - CAST(SUBSTR(s_birth_dt,1,4) AS NUMBER) AS AGE, s_birth_dt, s_citz_code, s_regent_res, 'Age over 100 years' AS reason
+       SELECT 'S-12c' AS label, count(*) AS err_count
+       -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_gender, s_ethnic, s_year,  TO_CHAR(SYSDATE, 'YYYY') - CAST(SUBSTR(s_birth_dt,1,4) AS NUMBER) AS AGE, s_birth_dt, s_citz_code, s_regent_res, 'Age over 100 years' AS reason
          FROM   students_current
         WHERE  CAST(TO_CHAR(SYSDATE, 'YYYY') AS NUMBER) - CAST(SUBSTR(s_birth_dt,1,4) AS NUMBER) >= 100
 
@@ -574,6 +542,7 @@
           AND    lpad(s_cur_cip1,'6','0')     NOT IN (SELECT cip_code FROM cip2010)
           AND    lpad(s_cur_cip_ushe,'6','0') NOT IN (SELECT cip_code FROM cip2010)
 
+
         UNION
 
 -- S-17a -------------------------------------------------------------------------------------------
@@ -591,8 +560,9 @@
 
        SELECT 'S-17b' AS label, count(*) AS err_count
          FROM   students_current
-        WHERE  s_entry_action IN ('HS','FF','FH','FS')
-          AND    s_level IN ('GM','GD','GN','PM','PO','PL')
+        WHERE  s_entry_action IN ('HS','FF','FH','FS', 'TU')
+          AND    s_level IN ('GN','GG')
+
 
         UNION
 
@@ -949,13 +919,13 @@ UNION
            )
         UNION
 
--- S-35b -------------------------------------------------------------------------------------------
+-- S-35a -------------------------------------------------------------------------------------------
 -- Banner IDs - There should be a valid institutionally assigned ID for all records.
 --            - This institution has an 8 digit institutional ID.
 
-       SELECT 'S-35b' AS label, count(*) AS err_count
+       SELECT 'S-35a' AS label, count(*) AS err_count
          FROM   students_current
-        WHERE  LENGTH(s_banner_id) <> '9'
+        WHERE  LENGTH(s_banner_id) != '9'
 
         UNION
 
@@ -979,8 +949,10 @@ UNION
        SELECT 'S-42*' AS label, count(*) AS err_count
           -- SELECT s_banner_id, s_last_name, s_first_name, s_hsgrad_dt, s_birth_dt, s_citz_code, s_entry_action, s_styp, s_cur_prgm1, s_age
          FROM   students_current
-        WHERE  LENGTH(s_hsgrad_dt) <> '8'
-           OR    s_hsgrad_dt IS NULL
+        WHERE  (LENGTH(s_hsgrad_dt) != '8'
+           OR    s_hsgrad_dt IS NULL)
+           AND s_entry_action in ('CS', 'FF', 'FH', 'RS')
+           AND s_state_origin = 'UT'
 
         UNION
 
@@ -1515,10 +1487,11 @@ UNION
 
 /* Graduate GPA:
    Checks to see if Graduate GPA is zero */
-   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_cum_gpa_grad, s_entry_action, s_banner_term
+   UNION
+    SELECT 'DSU-Internal Check: No Graduate GPA' AS label, count(*) AS err_count
+   --SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_cum_gpa_grad, s_entry_action, s_banner_term
    FROM ENROLL.students_current
    WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG');
 
- -- SELECT * FROM student_courses_current;
 
 -- end of file
