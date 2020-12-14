@@ -285,10 +285,23 @@ SELECT 'S03f' AS label, COUNT(*) AS err_count
     WHERE  s_first_name IS NULL
     OR     s_first_name = '.'
 
- UNION
-
     -- Standard Response
-    -- International Student has no First Name
+    -- International Student has no First , Name
+
+UNION
+
+
+ -- S-08a -------------------------------------------------------------------------------------------
+ -- First Name - Every student should have a First name, but international students may not.
+   SELECT 'S-08b' AS label, count(*) AS err_count
+   -- SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code) as zip_char_length
+	FROM students_current
+	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code in ('00000','11111') or s_cur_zip_code like '%[a-z]%')
+	and s_citz_code <> '1'
+
+UNION
+
+
 
  -- S-08 --------------------------------------------------------------------------------------------
  -- Zip Code - Every student should have a zip code. Judge if there are a lot of zips missing.
