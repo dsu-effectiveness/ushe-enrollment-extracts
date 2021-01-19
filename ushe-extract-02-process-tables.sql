@@ -262,8 +262,7 @@ select *
                  addr.s_county_origin,
                  addr.s_state_origin,
                  addr.s_country_origin,
-                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10
-                      THEN substr(addr.s_cur_zip_code,1,5)
+                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10 THEN substr(addr.s_cur_zip_code,1,5)
                       ELSE addr.s_cur_zip_code
                       END AS s_cur_zip_code,
                  -------------------------
@@ -468,14 +467,14 @@ select *
                                          THEN 'US'
                                          ELSE 'ER' END
                                END AS s_country_origin,
-                          CASE WHEN zip_code IS NOT NULL
-                               THEN zip_code
-                               ELSE nvl((     -- As a last resort, pull the first applicable zip code.
-                                          SELECT MIN(spraddr_zip)
-                                          FROM   spraddr
-                                          WHERE  spraddr_pidm = s_pidm
-                                          AND    REGEXP_LIKE(spraddr_zip, '^[[:digit:]]+$')
-                                        ),'00000')
+                          CASE WHEN zip_code IS NOT NULL THEN zip_code
+--                                WHEN zip_code > 5 THEN nvl((     -- As a last resort, pull the first applicable zip code.
+--                                           SELECT MAX(spraddr_zip)
+--                                           FROM   spraddr
+--                                           WHERE  spraddr_pidm = s_pidm
+--                                           AND    REGEXP_LIKE(spraddr_zip, '^[[:digit:]]+$')
+--                                         ),'00000')
+                               ELSE '00000'
                                END AS s_cur_zip_code
                    FROM   (
                             SELECT s_pidm,
@@ -498,7 +497,9 @@ select *
                                                        END
                                              ELSE nvl(supl.natn_code,addr.natn_code)
                                          END  AS natn_code,
-                                   addr.zip_code AS zip_code
+                                   --addr.zip_code AS zip_code
+                                   CASE WHEN LENGTH(dsc.f_get_formatted_addr(addr.pidm, 'LOCALPERM', 'zip')) < 5 THEN '00000'
+                                   ELSE (dsc.f_get_formatted_addr(addr.pidm, 'LOCALPERM', 'zip')) END AS zip_code
                             FROM   students,
                                    (
                                      SELECT sabsupl_pidm                       AS pidm,
@@ -591,7 +592,6 @@ select *
                    FROM   students, shrlgpa
                    WHERE  s_pidm = shrlgpa_pidm (+)
                    AND    shrlgpa_gpa_type_ind = 'I'
-                   AND    shrlgpa_levl_code IN ('NC','UG')
                    AND    shrlgpa_quality_points > 0
                    GROUP  BY shrlgpa_pidm
                  ) gphr,
@@ -1083,10 +1083,9 @@ select *
           AND    students.s_pidm = tgpa.inner_pidm (+)
           AND    students.s_pidm = tran.inner_pidm (+)
           AND    students.s_pidm = visa.inner_pidm (+)
-        );
+        )
 
  COMMIT;
-
 
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
@@ -1694,3 +1693,4 @@ select *
          );
 
 COMMIT;
+
