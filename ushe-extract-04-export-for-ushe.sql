@@ -143,7 +143,8 @@
            c_dest_site,
            c_enrl AS c_class_size,
            c_del_model,
-           c_level
+           c_level,
+           c_crn
     FROM   courses_current;
 
  -- Student Courses Table -----------------------------------------------------------------------------------
@@ -162,7 +163,8 @@
            sc_grade,
            sc_mem_hrs,
            sc_stud_type AS sc_student_type,
-           sc_banner_id	
+           sc_banner_id,
+           sc_crn
     FROM   student_courses_current;
 
  ------------------------------------------------------------------------------------------------------------
