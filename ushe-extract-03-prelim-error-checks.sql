@@ -71,7 +71,7 @@
  -- SC-10b ------------------------------------------------------------------------------------------
  -- Grade - Invalid Concurrent Enrollment Grades
     SELECT 'SC-10b' AS label, count(*) AS err_count
-  -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term
+  -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term, 'hb25 waiver over 125 or below zero' AS reason
    FROM ENROLL.students_current
    WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125)
 
@@ -109,6 +109,7 @@ UNION
                (
                   SELECT s_id FROM students_current
                )
+
 
         UNION
 
@@ -361,7 +362,7 @@ UNION
 --Added s_citz_code and not in statement to where clause on 9/24/2020 by tgroskreutz
 
        SELECT 'S-08b' AS label, count(*) AS err_count
-          -- SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code) as zip_char_length
+          -- SELECT s_inst, s_pidm, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code) as zip_char_length
          FROM students_current
         WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code in ('00000','11111') or s_cur_zip_code like '%[a-z]%')
           and s_citz_code <> '1'
@@ -985,6 +986,7 @@ UNION
           AND s_level != 'FR'
           AND s_entry_action not in ('FF', 'FH', 'TU', 'TG')
 
+
         UNION
 
 -- S-46 --------------------------------------------------------------------------------------------
@@ -999,7 +1001,7 @@ UNION
 -- Missing CIP 2
 
        SELECT 'S-49a*' AS label, count(*) AS err_count
-          -- SELECT s_banner_id, s_last_name, s_first_name,  s_cur_prgm2, s_cur_cip2, s_cur_coll_code2, s_cur_majr2, students_current.*
+          -- SELECT s_banner_id, s_last_name, s_first_name,  s_cur_prgm2, s_cur_cip2, s_cur_coll_code2, s_cur_majr2, 'Missing CIP 2' AS Reason
          FROM   students_current
         WHERE (s_cur_majr2 IS NOT NULL AND s_cur_cip2 IS NULL    )
            OR    (s_cur_majr2 IS NULL     AND s_cur_cip2 IS NOT NULL)
