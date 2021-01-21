@@ -1720,5 +1720,10 @@ WHERE s_banner_id IN ('D00362843', 'D00414886', 'D00437205', 'D00440390');
 
 UPDATE students_current
 SET s_entry_action = 'CS'
-WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00440390', 'D00417410')
+WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00440390', 'D00417410');
 
+UPDATE students_current
+SET s_hsgrad_dt = '19810701'
+WHERE s_banner_id = 'D00044116';
+
+COMMIT;
