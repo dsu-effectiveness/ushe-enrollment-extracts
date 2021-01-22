@@ -307,7 +307,7 @@ SELECT 'S03f' AS label, COUNT(*) AS err_count
 SELECT 'S-08b' AS label, count(*) AS err_count
 --SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code)
 	FROM students_current
-	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code like '%[a-z]%' or s_cur_zip_code not in ('00000','11111'))
+	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code like '%[a-z]%' or s_cur_zip_code in ('00000','11111'))
 	and s_citz_code <> '1'
 
 	UNION
