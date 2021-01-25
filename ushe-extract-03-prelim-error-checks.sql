@@ -77,7 +77,7 @@
              GROUP  BY s_banner_id
              HAVING count(*) > 1
            )
-           -- SELECT * FROM spriden where spriden_id = '00235893';
+
  UNION
 
  -- S-00b -------------------------------------------------------------------------------------------
@@ -120,7 +120,7 @@
     SELECT 'S-03a' AS label, count(*) AS err_count
     FROM   students_current
     WHERE  s_entry_action IN ('FF','FH')
-    AND    (s_id IS NULL OR s_id = ' ')
+    AND    (s_id IS NULL OR s_id = ' ' OR s_id IN ('000000000','00000000'))
 
  UNION
 
@@ -171,7 +171,7 @@
 
  -- However, students are not required to release their SSN, so no SSNs is not uncommon.
  -- Not a useful script to run because there will always be results and nothing we can do for them.
- /*
+/*
        SELECT 'S-03e' AS label, count(*) AS err_count
        FROM   students_current
        WHERE  s_citz_code = '1'
@@ -181,7 +181,16 @@
                 s_id = ' ' OR s_id IS NULL
               )
  UNION
- */
+*/
+
+/*** Duplicate of 03A, removed on 9/24/2020 by tgroskreutz
+--S-03f Every record should have an s_id. */
+SELECT 'S03f' AS label, COUNT(*) AS err_count
+   -- SELECT s_inst,  s_banner_id, s_last, s_first, s_gender
+	FROM students_current
+	WHERE s_id in ('000000000','00000000')
+
+	UNION
 
  -- S-04 --------------------------------------------------------------------------------------------
  -- ID Flag - Every student should have a valid id_flag.
@@ -200,23 +209,17 @@
     SELECT 'S-04a' AS label, count(*) AS err_count
  -- SELECT s_banner_id, s_id, s_id_flag, students_current.*
     FROM   students_current
-    WHERE  s_id_flag  = 'S'
-    AND    (
-                (substr(s_id,0,2) != '00' AND substr(s_id,4,2) = '00') -- dummy ID
-             OR  substr(s_id,0,1)  = '9'                               -- dummy ID
-             OR  s_id IN ('078051120','111111111','123456789')         -- dummy ID
-	           OR (s_id >= '987654320' AND s_id <= '987654329')          -- dummy ID
-		         OR  s_id LIKE '000'                                       -- dummy ID
-             OR  s_id LIKE '%9%99999%'                                 -- dummy ID
-	           OR  s_id LIKE '666%'                                      -- cant begin w/ 666
-	           OR  s_id LIKE '9%'	                                       -- cant begin w/ 9
-	           OR  substr(s_id,4,2) = '00'                               -- middle cant be 00
-	           OR  substr(s_id,6,4) = '0000'                             -- last four cant be 0000
-	           OR  LENGTH(trim(s_id)) < 9                                -- not 9 digits
-	           OR  s_id LIKE '%[a-z]%'                                   -- contains nondigit
-	           OR  s_id =  s_banner_id                                   -- Banner_ID
-	           OR  substr(s_id, -8) LIKE substr(s_banner_id, -8)         -- Banner ID
-           )
+    WHERE s_id_flag = 's'
+	AND (S_ID IN ('078051120','111111111','123456789','219099999')
+		OR (S_ID >= '987654320' AND S_ID <= '987654329')
+		OR S_ID='999999999'
+		OR S_ID LIKE '000%'
+		OR S_ID LIKE '666%'
+		OR S_ID LIKE '9%'
+		OR S_ID LIKE '%[a-z]%'
+		OR LENGTH(S_ID) < 9
+		OR SUBSTR(S_ID,4,2) = '00'
+		OR SUBSTR(S_ID,6,4) = '0000')
 
  UNION
 
@@ -237,12 +240,12 @@
 
 
  -- S-04c --------------------------------------------------------------------------------------------
- -- ID Flag - Every student should have a valid id_flag.
+-- Incorrect id_flag. With I flag, s_id should match s_banner_id
 
     SELECT 'S-04c' AS label, count(*) AS err_count
  -- SELECT s_banner_id, s_id, s_id_flag, students_current.*
     FROM   students_current
-    WHERE  (s_id_flag  = 'I' AND s_id <> s_banner_id)
+    WHERE  (s_id_flag  = 'I' AND s_id != s_banner_id)
     OR     (s_id_flag != 'I' AND s_id  = s_banner_id)
 
  UNION
@@ -297,6 +300,17 @@
     WHERE  s_cur_zip_code IS NULL
 
  UNION
+
+--S-08b  --------------------------------------------------------------------------------------------
+-- Every student should have a zip code.  Judge if there are a lot of zips missing.''
+--Added s_citz_code and not in statement to where clause on 9/24/2020 by tgroskreutz
+SELECT 'S-08b' AS label, count(*) AS err_count
+--SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code)
+	FROM students_current
+	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code like '%[a-z]%' or s_cur_zip_code in ('00000','11111'))
+	and s_citz_code <> '1'
+
+	UNION
 
  -- S-09 --------------------------------------------------------------------------------------------
  -- Citizenship Code - There should be a s_citz_code for every record.
@@ -1480,37 +1494,21 @@
           substr(label,instr(label,'-')+1,LENGTH(label)-instr(label,'-'));
 
  ----------------------------------------------------------------------------------------------------
+ -- Internal Error Checks
  ----------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------- 
---  Visa Errors
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is not null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code = '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code not in ('2', '3') and s_visatype is not null
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code <> '2' and s_visatype is null and s_ethnic = 'N'
--- select s_banner_id, s_last_name, s_first_name, s_citz_code, s_ethnic, s_visatype from students_current where s_citz_code = '2' and s_visatype is null and s_ethnic <> 'N'
+ ----------------------------------------------------------------------------------------------------
+/* HB75_Waiver:
+   Checks to see if there are negative or over 125% */
+   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term
+   FROM ENROLL.students_current
+   WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125);
 
---Online Errors
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section like '4%' and C_Delivery_Method <> 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section not like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section not like '4%' and C_Delivery_Method = 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type = 'O01' and c_crs_section not like '4%' and C_Delivery_Method <> 'I'
--- Select c_banner_term, c_crn, c_site_type, c_crs_section, C_Delivery_Method from courses_current where c_site_type <> 'O01' and c_crs_section like '4%' and C_Delivery_Method <> 'I'
+/* Graduate GPA:
+   Checks to see if Graduate GPA is zero */
+   SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_cum_gpa_grad, s_entry_action, s_banner_term
+   FROM ENROLL.students_current
+   WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG');
 
-  -- COMMIT; select ( 
-  
- -- SELECT * FROM students_current where s_banner_id = '00398842'; select * from spbpers where spbpers_pidm = 274310
- -- SELECT * FROM courses_current@proddb where c_crn = 43474;
  -- SELECT * FROM student_courses_current;
-
--- select f_calculate_age(stvterm_start_date, spbpers_birth_date, spbpers_dead_date) as calc_age, to_char(spbpers_birth_date,'YYYYMMDD') AS to_char_date, spbpers.* FROM spbpers, stvterm where stvterm_code = '201840' AND spbpers_pidm = '274310'
-
--- SELECT * FROM students_current where s_entry_action in ('FF', 'FH', 'TU');
--- SELECT * FROM students_current where s_entry_action in ('FF', 'FH', 'TU') and s_ethnic = 'N'
-
-select * from students_current where s_banner_id in ('00433848', '00434486', '00415580', '00205890', '00260843')
-select * from students_current where s_id = '647746723'
-
 
 -- end of file

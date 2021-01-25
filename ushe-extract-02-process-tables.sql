@@ -10,7 +10,7 @@
     p_extract       VARCHAR2(1)
   );
   
-  INSERT INTO extract_parameters VALUES ('202043','202040','2021','2021','2','3');
+  INSERT INTO extract_parameters VALUES ('20204E','202040','2021','2021','2','E');
 */
 
 select *
@@ -431,7 +431,7 @@ select *
           FROM   students, --<-- Created in the WITH statement above
                  ( /**/
                    SELECT s_pidm          AS inner_pidm,
-                          CASE WHEN natn_code != 'US' AND stat_code != 'UT'
+                          CASE WHEN natn_code != 'US' AND stat_code NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI', 'UT')
                                     THEN 'UT097'
                                WHEN stat_code != 'UT'
                                     THEN 'UT099'
@@ -455,7 +455,7 @@ select *
                                          THEN 'XX'
                                          ELSE 'ER' END
                                END AS s_state_origin,
-                          CASE WHEN natn_code IS NOT NULL
+                          CASE WHEN natn_code IS NOT NULL AND stat_code NOT IN ('AA', 'AE', 'AP', 'AS', 'FM', 'GU', 'MH', 'MP', 'PR', 'PW', 'VI')
                                     THEN (SELECT iso_code FROM country_iso WHERE fips_code = natn_code)
                                ELSE CASE WHEN stat_code IN
                                               (
@@ -524,6 +524,8 @@ select *
                             AND    s_pidm = addr.pidm (+)
                           )
                  ) addr,
+
+
                  (
                    WITH ssid_list AS
                    (
@@ -550,7 +552,7 @@ select *
                      FROM rpratrm, students,
                           (SELECT  SUM((SELECT MAX (sfrrgfe_per_cred_charge)
                              FROM sfrrgfe
-                            WHERE sfrrgfe_term_code = '202020'
+                            WHERE sfrrgfe_term_code = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                               AND sfrrgfe_from_flat_hrs = 12
                               AND sfrrgfe_resd_code = 'R'
                               AND sfrrgfe_detl_code IN ('1001', '1002')
@@ -558,7 +560,7 @@ select *
                               AND sfrrgfe_rate_code IS NULL)
                 - (SELECT MAX (sfrrgfe_per_cred_charge)
                          FROM sfrrgfe
-                        WHERE sfrrgfe_term_code = '202020'
+                        WHERE sfrrgfe_term_code = (SELECT DISTINCT p_banner_term FROM extract_parameters)
                           AND sfrrgfe_from_flat_hrs = 12
                           AND sfrrgfe_resd_code = 'N'
                           AND sfrrgfe_detl_code IN ('1200', '1201')
@@ -1440,7 +1442,7 @@ select *
                           coll_code                            AS c_college,
                           dept_code                            AS c_dept,
                           levl_code1                           AS c_crs_level,
-                          CASE WHEN camp_code IN ('AC1','AU1')  THEN 'A01'
+                          CASE WHEN camp_code IN ('AC1','AU1', 'ACE')  THEN 'A01'
                                WHEN camp_code = 'B8C'           THEN 'B80'
                                WHEN camp_code = 'UOS'           THEN 'C'
                                WHEN camp_code IN ('OU1', 'V01') THEN 'O01'
@@ -1693,65 +1695,37 @@ select *
 
 COMMIT;
 
-/* Manual Fixes
-   These students were already assigned a previous cohort
-*/
-UPDATE students_current
-SET s_entry_action = 'CS'
-WHERE s_pidm IN ('273496','289096');
-UPDATE students_current
-SET s_entry_action = 'RS'
-WHERE s_pidm IN ('144595');
+/* Manual fixes */
 
+/* Entry Action */
 UPDATE students_current
 SET s_entry_action = 'CG'
-WHERE s_pidm = '76101';
+WHERE STUDENTS_CURRENT.s_banner_id = 'D00205890';
 
 UPDATE students_current
-SET s_state_origin = 'UT', s_county_origin = 'UT053'
-WHERE s_banner_id IN (
-'D00042810',
-'D00041511',
-'D00427966',
-'D00070135');
+SET s_entry_action = 'RS'
+WHERE s_banner_id IN ('D00271899', 'D00028976');
 
 UPDATE students_current
-SET s_state_origin = 'UN'
-WHERE s_banner_id = 'D00037836';
+SET s_entry_action = 'HS'
+WHERE s_banner_id = 'D00417693';
 
 UPDATE students_current
-SET s_state_origin = 'AP'
-WHERE s_banner_id = 'D00427966';
+SET s_entry_action = 'NM'
+WHERE s_banner_id IN ('D00434534', 'D00438281');
 
 UPDATE students_current
-SET s_country_origin = 'US'
-WHERE s_banner_id IN (
-'D00315526',
-'D00363726',
-'D00327938',
-'D00415110',
-'D00414209',
-'D00393891');
+SET s_entry_action = 'FF'
+WHERE s_banner_id IN ('D00362843', 'D00414886', 'D00437205', 'D00440390', 'D00417693', 'D00440390');
 
 UPDATE students_current
-SET s_id_flag = CASE WHEN s_id LIKE 'D%' THEN 'I' ELSE 'S' END;
+SET s_entry_action = 'CS'
+WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00417410');
 
 UPDATE students_current
-SET s_county_origin = 'UT030'
-WHERE s_banner_id = 'D00427966';
+SET s_hsgrad_dt = '19810701'
+WHERE s_banner_id = 'D00044116';
 
-UPDATE students_current
-SET s_county_origin = 'UT053'
-WHERE s_banner_id;
-
-UPDATE students_current
-SET s_county_origin = 'UT099'
-WHERE s_banner_id IN ('D00327938',
-'D00393891',
-'D00315526',
-'D00363726',
-'D00415110',
-'D00414209'
-);
 
 COMMIT;
+

@@ -1,6 +1,7 @@
 
+
  -- File:     pre-enrollment-error-checks.sql
- -- Term:     202043 (2020 Fall 3rd Week)
+ -- Term:     20204E (2020 Fall EOT)
  -- Action:   Update and run all of these queries, add any results to this term's error spreadsheet
  --           in Excel and send them to Julie Stender (Students) and/or Sharon Lee (Classes).
 
@@ -1500,7 +1501,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     )              AS xfer_credits,
                     'Check Entry Action Change' 
                                    AS reason
-             FROM   students_201523 s, -- update each term
+             FROM   students_202043 s, -- update each term
                     dailystats d,
                     spriden
              WHERE  d.pidm = s.pidm
