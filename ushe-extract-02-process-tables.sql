@@ -1707,7 +1707,7 @@ SET s_entry_action = 'RS'
 WHERE s_banner_id IN ('D00271899', 'D00028976');
 
 UPDATE students_current
-SET s_entry_action = 'FH'
+SET s_entry_action = 'HS'
 WHERE s_banner_id = 'D00417693';
 
 UPDATE students_current
@@ -1716,14 +1716,16 @@ WHERE s_banner_id IN ('D00434534', 'D00438281');
 
 UPDATE students_current
 SET s_entry_action = 'FF'
-WHERE s_banner_id IN ('D00362843', 'D00414886', 'D00437205', 'D00440390');
+WHERE s_banner_id IN ('D00362843', 'D00414886', 'D00437205', 'D00440390', 'D00417693', 'D00440390');
 
 UPDATE students_current
 SET s_entry_action = 'CS'
-WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00440390', 'D00417410');
+WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00417410');
 
 UPDATE students_current
 SET s_hsgrad_dt = '19810701'
 WHERE s_banner_id = 'D00044116';
 
+
 COMMIT;
+
