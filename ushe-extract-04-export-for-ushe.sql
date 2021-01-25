@@ -88,6 +88,9 @@
             s_cur_coll_code2 AS s_college2,
             s_major_desc2    AS s_major2
      FROM   students_current;
+
+
+
     
  -- Courses Table -------------------------------------------------------------------------------------------
  
