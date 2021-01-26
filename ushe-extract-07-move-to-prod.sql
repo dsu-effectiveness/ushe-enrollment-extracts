@@ -1,20 +1,21 @@
     /* --- RUN IN PROD ----------------------------------------------------------------------------------------------------- */
-    DROP TABLE students_202043;
-    DROP TABLE course_202043;
-    DROP TABLE student_course_202043;
+    DROP TABLE students_20204e;
+    DROP TABLE course_20204e;
+    DROP TABLE student_course_20204e;
     
-    CREATE TABLE students_202043       AS SELECT * FROM students_20192e;
-    CREATE TABLE course_202043         AS SELECT * FROM course_20192e;
-    CREATE TABLE student_course_202043 AS SELECT * FROM student_course_20192e;
-    ALTER TABLE course_202043 MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
+    CREATE TABLE students_20204e       AS SELECT * FROM students_20192e;
+    CREATE TABLE course_20204e         AS SELECT * FROM course_20192e;
+    CREATE TABLE student_course_20204e AS SELECT * FROM student_course_20192e;
+    ALTER TABLE course_20204e MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
 
-    TRUNCATE TABLE students_202043;
-    TRUNCATE TABLE course_202043;
-    TRUNCATE TABLE student_course_202043;
+    TRUNCATE TABLE students_20204e;
+    TRUNCATE TABLE course_20204e;
+    TRUNCATE TABLE student_course_20204e;
+
 
     /* --- RUN IN IR1 or IR2 ------------------------------------------------------------------------------------------------------ */
 
-    INSERT INTO students_202043@proddb.dixie.edu
+    INSERT INTO students_20204e@proddb.dixie.edu
     SELECT s_pidm AS pidm,
            SUBSTR(s_banner_id,2,8) AS s_banner_id,
            s_banner_term AS TERM,
@@ -111,7 +112,7 @@
     FROM   students_current;
     COMMIT;
     
-    INSERT INTO course_202043@proddb.dixie.edu
+    INSERT INTO course_20204e@proddb.dixie.edu
     SELECT c_crn AS crn,
            c_banner_term AS TERM,
            c_inst,
@@ -190,7 +191,7 @@
     FROM   courses_current;
     COMMIT;
     
-    INSERT INTO student_course_202043@proddb.dixie.edu
+    INSERT INTO student_course_20204e@proddb.dixie.edu
     SELECT sc_pidm AS pidm,
            sc_id AS ID,
            sc_banner_term AS TERM,
@@ -223,7 +224,7 @@
     SELECT s_cur_prgm1, s_major_desc1, COUNT(*) AS students FROM students_current WHERE s_level = 'GG' GROUP BY s_cur_prgm1, s_major_desc1 ORDER BY s_cur_prgm1;
     */
     
---    select * from students_202043
---    select * from course_202043
---    select * from student_course_202043
+--    select * from students_20204e
+--    select * from course_20204e
+--    select * from student_course_20204e
     
