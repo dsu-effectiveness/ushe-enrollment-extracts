@@ -41,8 +41,8 @@
  ------------------------------------------------------------------------------------------------------------
 END;
 /**/
- -- Create Temp Table for Students Data 
-   -- CREATE TABLE ts20204E AS
+  --Create Temp Table for Students Data
+    CREATE TABLE ts20204E AS
                  SELECT s_inst,
                         s_year, 
                         s_term, 
@@ -181,7 +181,7 @@ END;
                         c_dest_site,
                         dsc_fye, 
                         enrl AS c_class_size,
-                        '20204e' AS c_banner_extract,
+                        '20204E' AS c_banner_extract,
                         c_level,
                         s11_wkld,
                         '   ' AS s11_wkld_cat,
@@ -243,11 +243,12 @@ END;
     INSERT INTO student_courses SELECT * FROM tsc20204E;
 
 
+
     
     -- Verify Imported Data.
-    SELECT * FROM students03      WHERE dsc_term_code = '202043';
-    SELECT * FROM courses         WHERE dsc_term_code = '202043';
-    SELECT * FROM student_courses WHERE dsc_term_code = '202043';
+    SELECT * FROM students03      WHERE dsc_term_code = '20204E';
+    SELECT * FROM courses         WHERE dsc_term_code = '20204E';
+    SELECT * FROM student_courses WHERE dsc_term_code = '20204E';
 
     -- Delete temp tables.
     DROP TABLE  ts20204E;
