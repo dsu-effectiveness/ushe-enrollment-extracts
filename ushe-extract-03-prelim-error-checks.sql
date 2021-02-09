@@ -71,7 +71,7 @@
  -- SC-10b ------------------------------------------------------------------------------------------
  -- Grade - Invalid Concurrent Enrollment Grades
     SELECT 'SC-10b' AS label, count(*) AS err_count
-  -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term, 'hb25 waiver over 125 or below zero' AS reason
+  -- SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_hb75_waiver, s_banner_term, s_hb75_waiver, 'hb25 waiver over 125 or below zero' AS reason
    FROM ENROLL.students_current
    WHERE (s_hb75_waiver < 0 OR s_hb75_waiver > 125)
 
@@ -398,7 +398,7 @@ UNION
 -- County Code - There should be a county origin for every record.
 
        SELECT 'S-10' AS label, count(*) AS err_count
-          -- SELECT s_county_origin, students_current.*
+          -- SELECT s_county_origin, s_banner_id, s_last_name, s_first_name, s_state_origin, s_country_origin
          FROM   students_current
         WHERE  s_county_origin IS NULL
            OR     s_county_origin NOT IN ('UT001','UT003','UT005','UT007','UT009','UT011','UT013','UT015',
@@ -423,7 +423,7 @@ UNION
 -- State Codes - Checks where the state is not UT but county is not out of state.
 
        SELECT 'S-11b' AS label, count(*) AS err_count
-          -- SELECT s_county_origin, s_state_origin, s_county_origin, s_country_origin, students_current.*
+          -- SELECT s_county_origin, s_banner_id, s_last_name, s_first_name, s_state_origin, s_county_origin, s_country_origin
          FROM   students_current
         WHERE  s_state_origin != 'UT'
           AND    s_county_origin NOT IN ('UT097','UT099')
@@ -681,12 +681,13 @@ UNION
 -- Entry Action - Traditional students attending concurrent enrollment classes.
 
        SELECT 'S-17h' AS label, count(*) AS err_count
-          /* SELECT s_pidm, s_banner_id, s_last_name, s_first_name, c_crn, c_crs_subject, c_crs_number, c_crs_section, s_styp, s_hsgrad_dt,
+          /* SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_entry_action, c_crn, c_crs_subject, c_crs_number, c_budget_code, c_crs_section, s_styp, s_hsgrad_dt,
                     'Non-HS student in an HSCE Section' AS reason /**/
          FROM   students_current s, courses_current c, student_courses_current sc
         WHERE  s_pidm = sc_pidm AND c_crn  = sc_crn
           AND    c_budget_code IN ('BC','SF')
           AND    s_entry_action != 'HS'
+
 
         UNION
 
@@ -820,7 +821,7 @@ UNION
 -- Country Origin - Check for state codes within the US, but the country code is not US.
 
        SELECT 'S-27a' AS label, count(*) AS err_count
-          -- SELECT s_county_origin, s_state_origin, s_country_origin, students_current.*
+          -- SELECT s_pidm, s_banner_id, s_first_name, s_last_name, s_county_origin, s_state_origin, s_country_origin
          FROM   students_current
         WHERE  s_country_origin <> 'US'
           AND    (
@@ -874,6 +875,7 @@ UNION
            OR    (s_high_school IS NULL AND s_state_origin = 'UT')
            OR     s_high_school = ' '
            )
+           AND s_styp IN ('C', 'R')
         -- AND    s_entry_action != 'NM'
         -- AND    s_age < 25
 
@@ -1495,5 +1497,6 @@ UNION
    FROM ENROLL.students_current
    WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG');
 
+COMMIT;
 
 -- end of file
