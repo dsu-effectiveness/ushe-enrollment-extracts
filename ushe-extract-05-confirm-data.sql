@@ -5,7 +5,12 @@
  ----------------------------------------------------------------------------------------------------
  -- USHE S-09b --------------------------------------------------------------------------------------
  
-    SELECT s_citz_code, count(*) AS "S-09b" FROM students_current GROUP BY s_citz_code ORDER BY s_citz_code;    
+    SELECT s_citz_code, count(*) AS "S-09b" FROM students_current GROUP BY s_citz_code ORDER BY s_citz_code;
+
+ ----------------------------------------------------------------------------------------------------
+ -- USHE S-10b --------------------------------------------------------------------------------------
+
+    SELECT s_county_origin, count(*) AS "S-10b" FROM students_current GROUP BY s_county_origin ORDER BY s_county_origin;
     
  ----------------------------------------------------------------------------------------------------
  -- USHE S-14 --------------------------------------------------------------------------------------- 
@@ -49,16 +54,25 @@
  -- USHE S-21 ---------------------------------------------------------------------------------------
  -- both the courses and student_courses table must be compiled to investigate.
     
-    SELECT label, stu_count AS "S-21"
+    SELECT custom_order, label, stu_count AS "S-21"
     FROM   ( 
-             (SELECT '0'           AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad  = 0000                            ) UNION ALL
-             (SELECT 'Less Than 1' AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad >  0000 AND s_cum_gpa_ugrad < 1000 ) UNION ALL
-             (SELECT '1'           AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad >= 1000 AND s_cum_gpa_ugrad < 2000 ) UNION ALL
-             (SELECT '2'           AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad >= 2000 AND s_cum_gpa_ugrad < 3000 ) UNION ALL
-             (SELECT '3'           AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad >= 3000 AND s_cum_gpa_ugrad < 4000 ) UNION ALL
-             (SELECT '4'           AS label, count(s_cum_gpa_ugrad) AS stu_count FROM students_current WHERE s_cum_gpa_ugrad  = 4000                            )
-           )
-    ORDER  BY label;
+             (SELECT '0'           AS label, count(s_cum_gpa_ugrad) AS stu_count, 6 AS custom_order FROM students_current WHERE s_cum_gpa_ugrad  = 0000                            ) UNION ALL
+             (SELECT 'Less Than 1' AS label, count(s_cum_gpa_ugrad) AS stu_count, 5 AS custom_order  FROM students_current WHERE s_cum_gpa_ugrad >  0000 AND s_cum_gpa_ugrad < 1000 ) UNION ALL
+             (SELECT'1' label, count(s_cum_gpa_ugrad) AS stu_count, 1 AS custom_order  FROM students_current WHERE s_cum_gpa_ugrad >= 1000 AND s_cum_gpa_ugrad < 2000 ) UNION ALL
+          (SELECT '2'           AS label, count(s_cum_gpa_ugrad) AS stu_count, 2 AS custom_order  FROM students_current WHERE s_cum_gpa_ugrad >= 2000 AND s_cum_gpa_ugrad < 3000 ) UNION ALL
+             (SELECT'3'           AS label, count(s_cum_gpa_ugrad) AS stu_count, 3 AS custom_order  FROM students_current WHERE s_cum_gpa_ugrad >= 3000 AND s_cum_gpa_ugrad < 4000 ) UNION ALL
+             (SELECT'4'         AS label, count(s_cum_gpa_ugrad) AS stu_count, 4 AS custom_order  FROM students_current WHERE s_cum_gpa_ugrad  = 4000                            )
+           )  ORDER  BY custom_order;
+
+ ----------------------------------------------------------------------------------------------------
+ -- USHE S-27D --------------------------------------------------------------------------------------
+
+    SELECT s_state_origin, count(*) AS "S-27D" FROM students_current GROUP BY s_state_origin ORDER BY s_state_origin;
+
+ ----------------------------------------------------------------------------------------------------
+ -- USHE S-27E --------------------------------------------------------------------------------------
+
+    SELECT s_country_origin, count(*) AS "S-27E" FROM students_current GROUP BY s_country_origin ORDER BY s_country_origin;
      
  ----------------------------------------------------------------------------------------------------
  -- USHE S-34 ---------------------------------------------------------------------------------------
@@ -79,8 +93,8 @@
  -- USHE S-36 ---------------------------------------------------------------------------------------
 
     SELECT '3671' AS "S-36",
-           (SELECT count (*) FROM students_current WHERE s_act_comp > 0) AS s_act,
-           (SELECT count (*) FROM students_current) AS "total"
+           (SELECT count (distinct s_pidm) FROM students_current WHERE s_act_comp > 0) AS s_act,
+           (SELECT count (distinct s_pidm) FROM students_current) AS "total"
     FROM   DUAL;
     
     -- select s_term_gpa, s_cum_gpa_ugrad, students_current.* from students_current where s_term_gpa = s_cum_gpa_ugrad and s_term_earned_cr <> s_cum_hrs_ugrad and s_cum_gpa_ugrad not in (0, 4000) and s_entry_action NOT IN ('FF','FH','TU','TG') and s_level != 'FR';
