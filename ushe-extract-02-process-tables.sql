@@ -1696,41 +1696,48 @@ COMMIT;
 /* Manual Fixes */
 
 UPDATE students_current
-SET s_cur_cip2 = '110103',
-    s_cur_coll_code2 = 'SC'
-WHERE s_banner_id = 'D00004305';
+   SET s_cur_cip2       = '110103',
+       s_cur_coll_code2 = 'SC'
+ WHERE s_banner_id = 'D00004305';
 
 UPDATE students_current
    SET s_entry_action = 'RS'
-WHERE s_id IN ('566659884', '528951195');
+ WHERE s_id IN ('566659884', '528951195');
 
 UPDATE students_current
    SET s_entry_action = 'CS'
-WHERE s_id = '887724936';
+ WHERE s_id = '887724936';
 
 UPDATE students_current
    SET s_entry_action = 'CG'
-WHERE s_banner_id = 'D00205890';
+ WHERE s_banner_id = 'D00205890';
 
 UPDATE students_current
    SET s_high_school = '459200'
-WHERE s_banner_id IN ('D00358599', 'D00369879', 'D00379358', 'D00395896', 'D00402615','D00410332','D00413538', 'D00415590', 'D00421869');
+ WHERE s_banner_id IN
+       ('D00358599', 'D00369879', 'D00379358', 'D00395896', 'D00402615', 'D00410332', 'D00413538', 'D00415590',
+        'D00421869');
 
 UPDATE students_current
    SET s_high_school = '459000'
-WHERE s_banner_id IN ('D00393932', 'D00438574');
+ WHERE s_banner_id IN ('D00393932', 'D00438574');
 
 UPDATE students_current
-    SET s_hsgrad_dt = '20140501'
-WHERE s_banner_id = 'D00430107';
+   SET s_hsgrad_dt = '20140501'
+ WHERE s_banner_id = 'D00430107';
 
 UPDATE students_current
-    SET s_hsgrad_dt = '20200801'
-WHERE s_banner_id = 'D00438943';
+   SET s_hsgrad_dt = '20200801'
+ WHERE s_banner_id = 'D00438943';
 
 UPDATE students_current
-   SET s_county_origin = 'UT053', s_state_origin = 'UT', s_country_origin = 'US'
-WHERE s_banner_id = 'D00102234';
+   SET s_county_origin  = 'UT011',
+       s_state_origin   = 'UT',
+       s_country_origin = 'US'
+ WHERE s_banner_id = 'D00102234';
 
+UPDATE students_current
+   SET s_act_sci = NULL
+ WHERE s_banner_id = 'D00415719';
 
 COMMIT;
