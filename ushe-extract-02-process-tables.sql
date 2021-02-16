@@ -10,7 +10,7 @@
     p_extract       VARCHAR2(1)
   );
   
-  INSERT INTO extract_parameters VALUES ('20204E','202040','2021','2021','2','E');
+  INSERT INTO extract_parameters VALUES ('202123','202120','2021','2021','3','3');
 */
 
 select *
@@ -19,7 +19,6 @@ select *
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
-
 
  TRUNCATE TABLE students_current;
 
@@ -262,8 +261,7 @@ select *
                  addr.s_county_origin,
                  addr.s_state_origin,
                  addr.s_country_origin,
-                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10
-                      THEN substr(addr.s_cur_zip_code,1,5)
+                 CASE WHEN LENGTH(addr.s_cur_zip_code) <> 10 THEN substr(addr.s_cur_zip_code,1,5)
                       ELSE addr.s_cur_zip_code
                       END AS s_cur_zip_code,
                  -------------------------
@@ -468,14 +466,14 @@ select *
                                          THEN 'US'
                                          ELSE 'ER' END
                                END AS s_country_origin,
-                          CASE WHEN zip_code IS NOT NULL
-                               THEN zip_code
-                               ELSE nvl((     -- As a last resort, pull the first applicable zip code.
-                                          SELECT MIN(spraddr_zip)
-                                          FROM   spraddr
-                                          WHERE  spraddr_pidm = s_pidm
-                                          AND    REGEXP_LIKE(spraddr_zip, '^[[:digit:]]+$')
-                                        ),'00000')
+                          CASE WHEN zip_code IS NOT NULL THEN zip_code
+--                                WHEN zip_code > 5 THEN nvl((     -- As a last resort, pull the first applicable zip code.
+--                                           SELECT MAX(spraddr_zip)
+--                                           FROM   spraddr
+--                                           WHERE  spraddr_pidm = s_pidm
+--                                           AND    REGEXP_LIKE(spraddr_zip, '^[[:digit:]]+$')
+--                                         ),'00000')
+                               ELSE '00000'
                                END AS s_cur_zip_code
                    FROM   (
                             SELECT s_pidm,
@@ -498,7 +496,9 @@ select *
                                                        END
                                              ELSE nvl(supl.natn_code,addr.natn_code)
                                          END  AS natn_code,
-                                   addr.zip_code AS zip_code
+                                   --addr.zip_code AS zip_code
+                                   CASE WHEN LENGTH(dsc.f_get_formatted_addr(addr.pidm, 'LOCALPERM', 'zip')) < 5 THEN '00000'
+                                   ELSE (dsc.f_get_formatted_addr(addr.pidm, 'LOCALPERM', 'zip')) END AS zip_code
                             FROM   students,
                                    (
                                      SELECT sabsupl_pidm                       AS pidm,
@@ -591,7 +591,6 @@ select *
                    FROM   students, shrlgpa
                    WHERE  s_pidm = shrlgpa_pidm (+)
                    AND    shrlgpa_gpa_type_ind = 'I'
-                   AND    shrlgpa_levl_code IN ('NC','UG')
                    AND    shrlgpa_quality_points > 0
                    GROUP  BY shrlgpa_pidm
                  ) gphr,
@@ -1083,10 +1082,9 @@ select *
           AND    students.s_pidm = tgpa.inner_pidm (+)
           AND    students.s_pidm = tran.inner_pidm (+)
           AND    students.s_pidm = visa.inner_pidm (+)
-        );
+        )
 
  COMMIT;
-
 
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
@@ -1695,37 +1693,5 @@ select *
 
 COMMIT;
 
-/* Manual fixes */
-
-/* Entry Action */
-UPDATE students_current
-SET s_entry_action = 'CG'
-WHERE STUDENTS_CURRENT.s_banner_id = 'D00205890';
-
-UPDATE students_current
-SET s_entry_action = 'RS'
-WHERE s_banner_id IN ('D00271899', 'D00028976');
-
-UPDATE students_current
-SET s_entry_action = 'HS'
-WHERE s_banner_id = 'D00417693';
-
-UPDATE students_current
-SET s_entry_action = 'NM'
-WHERE s_banner_id IN ('D00434534', 'D00438281');
-
-UPDATE students_current
-SET s_entry_action = 'FF'
-WHERE s_banner_id IN ('D00362843', 'D00414886', 'D00437205', 'D00440390', 'D00417693', 'D00440390');
-
-UPDATE students_current
-SET s_entry_action = 'CS'
-WHERE s_banner_id IN ('D00398063', 'D00413489', 'D00417410', 'D00417410');
-
-UPDATE students_current
-SET s_hsgrad_dt = '19810701'
-WHERE s_banner_id = 'D00044116';
-
-
-COMMIT;
+/* Manual Fixes */
 

@@ -41,9 +41,10 @@
  ------------------------------------------------------------------------------------------------------------
 END;
 /**/
- -- Create Temp Table for Students Data 
-   -- CREATE TABLE ts20204E AS
-                 SELECT s_inst,
+
+ -- Create Temp Table for Students Data
+    CREATE TABLE ts202123 AS
+                 SELECT s_inst, 
                         s_year, 
                         s_term, 
                         s_extract,
@@ -116,7 +117,7 @@ END;
                         cohort_block,
                         s_term_att_cr, 
                         s_term_earned_cr,
-                        '20204E' AS dsc_term_code,
+                        '202123' AS dsc_term_code,
                         cur_minor1, 
                         cur_minor2,
                         religion, 
@@ -130,13 +131,12 @@ END;
                         term,
                         dsc.f_is_1st_gen@proddb(pidm) AS FIRST_GEN_IND,
                         hsgpa,
-                        (SELECT gorvisa_vtyp_code FROM gorvisa@proddb     WHERE gorvisa_pidm = pidm) AS vtyp_code,
-                        (SELECT hsgpact_hsgpact   from dsc.hsgpact@proddb where hsgpact_pidm = pidm) AS index_score
-                 FROM   students_20204E@proddb;
-
+                       (SELECT gorvisa_vtyp_code FROM gorvisa@proddb     WHERE gorvisa_pidm = pidm) AS vtyp_code,
+                       (SELECT hsgpact_hsgpact   from dsc.hsgpact@proddb where hsgpact_pidm = pidm) AS index_score
+                 FROM   students_202123@proddb;
                            
- -- Create Temp Table for Courses Data 
-    CREATE TABLE tc20204E AS
+ -- Create Temp Table for Courses Data
+    CREATE TABLE tc202123 AS
                  SELECT c_inst, 
                         c_year, 
                         c_term, 
@@ -181,7 +181,7 @@ END;
                         c_dest_site,
                         dsc_fye, 
                         enrl AS c_class_size,
-                        '20204e' AS c_banner_extract,
+                        '202123' AS c_banner_extract,
                         c_level,
                         s11_wkld,
                         '   ' AS s11_wkld_cat,
@@ -196,15 +196,15 @@ END;
                         c_bldg_num3,
                         c_room_max3,
                         c_room_type3
-                 FROM   course_20204E@proddb;
+                 FROM   course_202123@proddb;
 
  -- Create Temp Table for Student Courses Data 
-    CREATE TABLE tsc20204E AS
+    CREATE TABLE tsc202123 AS
                  SELECT sc_inst, 
                         sc_year, 
                         sc_term,
                         sc_extract,
-                        lpad(sc_id, 9, 0) AS sc_id,
+                        sc_id,
                         sc_crs_sbj,
                         sc_crs_num,
                         sc_crs_sec, 
@@ -219,43 +219,45 @@ END;
                         sc.pidm AS dsc_pidm,
                         gmod, 
                         dsc_loc_recvd, 
-                        '20204E' AS dsc_term_code,
+                        '202123' AS dsc_term_code,
                         sc.term,
-                        SUBSTR(s_banner_id,2,8) AS sc_banner_id,
+                        s_banner_id AS sc_banner_id,
                         c.c_level AS sc_level,
                         c.c_delivery_method AS sc_del_method
-                 FROM   student_course_20204E@proddb sc,
-                        students_20204E@proddb s,
-                        course_20204E@proddb c
+                 FROM   student_course_202123@proddb sc,
+                        students_202123@proddb s,
+                        course_202123@proddb c
                  WHERE  s.pidm = sc.pidm
                     AND  sc.crn = c.crn;
                     
  ------------------------------------------------------------------------------------------------------------
     
     -- Purge any previously imported records, if they exists, to prevent duplicates.                 
-    DELETE FROM students03      WHERE dsc_term_code = '20204E';
-    DELETE FROM courses         WHERE dsc_term_code = '20204E';
-    DELETE FROM student_courses WHERE dsc_term_code = '20204E';
+    DELETE FROM students03      WHERE dsc_term_code = '202123';
+    DELETE FROM courses         WHERE dsc_term_code = '202123';
+    DELETE FROM student_courses WHERE dsc_term_code = '202123';
     
     -- Insert records from temp tables into the extract tables.
-    INSERT INTO students03      SELECT * FROM  ts20204E;
-    INSERT INTO courses         SELECT * FROM  tc20204E;
-    INSERT INTO student_courses SELECT * FROM tsc20204E;
+    INSERT INTO students03      SELECT * FROM  ts202123;
+    INSERT INTO courses         SELECT * FROM  tc202123;
+    INSERT INTO student_courses SELECT * FROM tsc202123;
 
 
     
     -- Verify Imported Data.
-    SELECT * FROM students03      WHERE dsc_term_code = '202043';
-    SELECT * FROM courses         WHERE dsc_term_code = '202043';
-    SELECT * FROM student_courses WHERE dsc_term_code = '202043';
+    SELECT COUNT(*) FROM students03      WHERE dsc_term_code = '202123';
+    SELECT COUNT(*) FROM courses         WHERE dsc_term_code = '202123';
+    SELECT COUNT(*) FROM student_courses WHERE dsc_term_code = '202123';
 
     -- Delete temp tables.
-    DROP TABLE  ts20204E;
-    DROP TABLE  tc20204E;
-    DROP TABLE tsc20204E;
+    DROP TABLE  ts202123;
+    DROP TABLE  tc202123;
+    DROP TABLE tsc202123;
     
      COMMIT;
-    
+
+
+
  ------------------------------------------------------------------------------------------------------------
  /*
  -- This will supress the errors indicating that tables already exist.
