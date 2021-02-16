@@ -16,7 +16,7 @@
   BEGIN
   
   -- Manual Parameter: --------- --
-     v_dsu_extract := '202043';
+     v_dsu_extract := '20204E';
      v_database    := 'proddb';
   -- --------------------------- --
 
@@ -41,6 +41,7 @@
  ------------------------------------------------------------------------------------------------------------
 END;
 /**/
+
  -- Create Temp Table for Students Data
     CREATE TABLE ts202123 AS
                  SELECT s_inst, 

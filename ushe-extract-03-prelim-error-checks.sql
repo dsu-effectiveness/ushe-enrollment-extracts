@@ -360,6 +360,15 @@ UNION
 --S-08b  --------------------------------------------------------------------------------------------
 -- Every student should have a zip code.  Judge if there are a lot of zips missing.''
 --Added s_citz_code and not in statement to where clause on 9/24/2020 by tgroskreutz
+                                           
+SELECT 'S-08b' AS label, count(*) AS err_count
+--SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code)
+	FROM students_current
+	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code like '%[a-z]%' or s_cur_zip_code in ('00000','11111'))
+	and s_citz_code <> '1'
+
+	UNION
+
 
        SELECT 'S-08b' AS label, count(*) AS err_count
           -- SELECT s_inst, s_pidm, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code) as zip_char_length

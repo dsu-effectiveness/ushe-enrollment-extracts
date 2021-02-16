@@ -1,5 +1,3 @@
-
-
 /* --- RUN IN PROD ----------------------------------------------------------------------------------------------------- */
     DROP TABLE students_202123;
     DROP TABLE course_202123;
@@ -17,6 +15,7 @@
     /* --- RUN IN IR1 or IR2 ------------------------------------------------------------------------------------------------------ */
 
     INSERT INTO students_202123@proddb.dixie.edu
+
     SELECT s_pidm AS pidm,
            s_banner_id,
            s_banner_term AS TERM,
@@ -192,6 +191,7 @@
     FROM   courses_current;
     COMMIT;
     
+
     INSERT INTO student_course_202123@proddb.dixie.edu
     SELECT sc_pidm AS pidm,
            sc_id AS ID,
@@ -225,7 +225,9 @@
     SELECT s_cur_prgm1, s_major_desc1, COUNT(*) AS students FROM students_current WHERE s_level = 'GG' GROUP BY s_cur_prgm1, s_major_desc1 ORDER BY s_cur_prgm1;
     */
     
+
 --    select * from students_202123@proddb
 --    select * from course_202123@proddb
 --    select * from student_course_202123@proddb
+
     

@@ -508,7 +508,9 @@
  FROM   student_courses_current
  
  ORDER BY order_id;
+
 ----------------------------------------------------------------------------------------
+
   /* Matriculation Counts */
   SELECT COUNT(DISTINCT s_pidm) AS student_count,
        CASE
@@ -521,5 +523,7 @@ GROUP BY
           WHEN s_entry_action IN ('NM', 'HS') THEN 'Non-Matriculated'
           WHEN s_entry_action LIKE '%G' THEN 'Graduate'
        ELSE 'Matriculated' END;
+
   
+
 -- end of file 
