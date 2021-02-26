@@ -1284,13 +1284,9 @@ select *
                       ELSE dsc_schd_code
                       END AS c_instruct_type,
                  ascs.c_crs_level,
-                 CASE WHEN -- The course is one of a few Remedial Courses
-                           (c_crs_subject = ('MATH') AND (c_crs_number LIKE '0%' OR c_crs_number IN ('1000','1010')))
-                        OR (c_crs_subject = ('ENGL') AND (c_crs_number LIKE '0%' OR c_crs_number = ('1470')))
-                      THEN 'R' -- mark with an R
-                      WHEN -- The course is a Graduate Level Course
-                           c_crs_level = 'GR' THEN 'G' -- mark with a G
-                      ELSE 'U' -- Mark with a U, indicating an Undergraduate Level course
+                 CASE WHEN c_crs_number < '1000' AND c_crs_subject IN ('MATH', 'ENGL', 'ESL') THEN 'R'
+                      WHEN c_crs_number >= '6000' THEN 'G'
+                      ELSE 'U'
                       END AS c_level,
                  CAST (NULL AS VARCHAR2(4)) AS c_division,
                  'A' AS c_line_item,
@@ -1692,6 +1688,8 @@ select *
          );
 
 COMMIT;
+
+
 
 /* Manual Fixes */
 
