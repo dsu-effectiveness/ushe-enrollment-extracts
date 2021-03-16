@@ -303,7 +303,7 @@ select *
                  pers.s_religion,
                  pers.s_marital_status,
                  -------------------------
-                 f_calc_entry_action_2
+                 f_calc_entry_action_4
                  ( students.s_pidm,
                    students.s_banner_term
                  ) AS s_entry_action,
