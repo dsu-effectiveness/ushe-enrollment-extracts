@@ -1,5 +1,5 @@
  -- File:     pre-enrollment-error-checks.sql
- -- Term:     202123 (2021 Spring 3rd Week)
+ -- Term:     202123 (2021 Spring EOT Week)
  -- Action:   Update and run all of these queries, add any results to this term's error spreadsheet
  --           in Excel and send them to Julie Stender (Students) and/or Sharon Lee (Classes).
 
@@ -181,7 +181,7 @@
  -- Calculate Entry Action by ----------------------------------------------------------------------
 
     UPDATE enroll.dailystats
-    SET    reg_type = f_calc_entry_action_2(pidm,'202120');
+    SET    reg_type = f_calc_entry_action_4(pidm,'202120');
 
  -- Calculate Age by Today's Date ------------------------------------------------------------------
 
