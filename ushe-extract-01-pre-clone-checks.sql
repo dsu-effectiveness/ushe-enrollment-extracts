@@ -1220,7 +1220,7 @@
     --  result(s)
 
  ---------------------------------------------------------------------------------------------------
- /* Tab/Num: [ COURSES ][ 6 ]
+ /* Tab/Num: [ COURSES ][ 5 ]
   * Action:  Send results to Sharon Lee
   * Notes:   Finds courses marked OCCS Code 'A' that should not be.
   */
@@ -1234,9 +1234,6 @@
                     scbsupp_occs_code AS occs_code,
                     ay                AS academic_yr,
                     qualifies         AS does_qualify,
-                    ''                AS spacer1,
-                    ''                AS spacer2,
-                    ''                AS spacer3,
                     'Course should be OCCS Code V'
                                       AS reason
              FROM   scbsupp,
@@ -1264,7 +1261,7 @@
            );
     --  result(s)
 
-    --Online Errors
+--Online Errors
 SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
  -- SELECT DISTINCT *
     FROM   (
@@ -1296,9 +1293,10 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
        ));
 
  ---------------------------------------------------------------------------------------------------
+
  /* Tab/Num:  [ Classes ] [ 7 ]
   * Action:   Send results to Sharon Lee
-  * Notes:
+  * Notes: Classes with a Building, but no Room specified
   */
 
     SELECT COUNT(*) AS classes_table_7_errors
@@ -1332,155 +1330,84 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
              AND    room_code1 IS NULL
            );
     --  result(s)
-
  ---------------------------------------------------------------------------------------------------
- /* Tab/Num:  [ Classes ] [ 8 ]
-  * Action:   Send results to Sharon Lee
-  * Notes:    
-  */ /*
-
-    SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
- -- SELECT DISTINCT *   
-    FROM   (
-             SELECT ssbsect_term_code AS term_code, 
-                    ssbsect_crn       AS crn, 
-                    ssbsect_subj_code AS subj_code, 
-                    ssbsect_crse_numb AS crse_num, 
-                    ssbsect_seq_numb  AS seq_num,
-                    ssbsect_insm_code AS insm_code,
-                    ssbsect_camp_code AS camp_code,
-                    ssrsccd_sccd_code AS sccd_code,
-                    bldg_code1        AS bldg_code,
-                    room_code1        AS room_code,
-                    'Traditional Course lists no Building/Room?'
-                                      AS reason
-             FROM   as_catalog_schedule, 
-                    ssbsect,
-                    ssrsccd
-             wHERE  ssrsccd_crn = ssbsect_crn
-             AND    ssbsect_crn = crn_key
-             AND    ssrsccd_term_code = term_code_key
-             AND    ssbsect_term_code = term_code_key
-             AND    ssbsect_insm_code NOT IN ('I','E')
-             AND    ssts_code = 'A' 
-             AND    camp_code <> 'XXX'    
-             AND    term_code_key = '202120'
-             AND    bldg_code1 IS NULL
-           );
-    --  result(s)
-
- ---------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------
- /* Tab/Num: 
-  * Action:  Send results to Julie Stender   
-  * Notes:   Check for students without a valid s_ID of '000000000'
-  */ 
-    /* 
-    SELECT spriden.* 
-    FROM   spriden 
-    WHERE  spriden_id = '000000000';
- 
- ---------------------------------------------------------------------------------------------------
- /* Tab/Num: 
-  * Action:  Send results to Julie Stender   
-  * Notes:   WashCnt School dist tuition and not HS -- won't find before 3rd week as AR hasn't posted
-  */ /*
- 
-    SELECT COUNT(DISTINCT(pidm)) AS unspecified_table_3_errors
- -- SELECT DISTINCT *
-    FROM   (
-             SELECT DISTINCT(pidm)    AS pidm, 
-                    ID                AS banner_id, 
-                    f_format_name(spriden_pidm,'LFMI')                 
-                                      AS full_name,
-                    styp              AS stu_type,
-                    hsgraddt          AS hsgrad_dt, 
-                    cur_prgm          AS curr_prgm, 
-                    tbraccd_term_code AS term_code, 
-                    tbraccd_desc      AS accd_desc,
-                    'Not Marked STYP H, but has WashCo Shool District Tuition'
-                                      AS reason
-             FROM   taismgr.tbraccd, 
-                    dailystats,
-                    spriden
-             WHERE  spriden_pidm = pidm
-             AND    spriden_change_ind IS NULL
-             AND    tbraccd_term_code    = '202120' -- <-- YYYYTT of this reporting term
-             AND    tbraccd_pidm         = pidm
-             AND    tbraccd_detail_code IN ('7200', '7006')
-             AND    styp                <> 'H'
-           ); 
-    --  result(s)
- 
- ---------------------------------------------------------------------------------------------------
- -- End: General Error Checking Queries                                                           --
- ---------------------------------------------------------------------------------------------------
- ---------------------------------------------------------------------------------------------------
- -- START: EOT ONLY Error Checking Queries                                                        --
- ---------------------------------------------------------------------------------------------------
- 
- ---------------------------------------------------------------------------------------------------
- /* Tab/Num: [ Student Type ][  ]
-  * Action:  Send results to Julie Stender   
-  * Notes:   at EOT dump above pidms and change the syear sterm code to find those who were different
-  *          09.05.2014: created subquery to dump pidms from above query  
+ /* Tab/Num:  [ Schedule Types ] [ 1 ]
+  * Action:   Check for Schedule Type Errors
+  * Notes: Send to Curriculum and Graduate Studies Support Specialist - April Ficklin
   */
-  /*
-    SELECT COUNT(DISTINCT(pidm)) AS unspecified_table_4_errors
- -- SELECT DISTINCT *
-    FROM   (
-             SELECT DISTINCT(pidm)     AS pidm, 
-                    ID                 AS banner_id,  
-                    f_format_name(spriden_pidm,'LFMI')                 
-                                       AS full_name,
-                    hsgraddt           AS hsgrad_dt, 
-                    substr(dsc_term_code,0,5)||0 
-                                       AS term_then,
-                    s_entry_action     AS ea_then,  
-                    styp               AS stu_type,  
-                    cur_prgm           AS curr_prgm,
-                    s_cum_hrs_ugrad/10 AS sum_hrs,
-                    'Entry Action changed since 3rd Week' 
-                                       AS reason
-             FROM   bailey.students03@dscir,
-                    dailystats,
-                    spriden
-             WHERE  pidm = dsc_pidm
-             AND    spriden_change_ind IS NULL
-             AND    spriden_pidm = pidm
-             AND    s_entry_action <> 'HS'
-             AND    pidm IN 
-                    (
-                      SELECT DISTINCT(shrtckn_pidm)
-                      FROM   "SATURN"."SHRTCKN", dailystats, sorhsch
-                      WHERE  shrtckn_pidm = pidm
-                      AND    shrtckn_pidm = sorhsch_pidm (+)
-                      AND    shrtckn_term_code < '202120'  -- <-- YYYYTT of this reporting term
-                      AND    styp NOT IN  ('C','R','P')
-                      AND    shrtckn_subj_code NOT IN ('CED','STIT','ICL','ADE', 'SAB')
-                    ) 
-             AND    dsc_term_code = '202120'  -- <-- YYYYTT of this reporting term
-             ORDER  BY styp, s_entry_action, hsgraddt, pidm
-           );
-    --  result(s)
- 
- ---------------------------------------------------------------------------------------------------
+
+ SELECT COUNT(DISTINCT(crs_crn)) AS classes_8_errors
+    SELECT term_code,
+           crs_crn,
+           crs_subj_code,
+           crs_num,
+           ssbsect_section,
+           schd_code,
+           credit_hours,
+           lecture_hours,
+           lab_hours,
+           other_hours,
+           error_reason
+    FROM
+                  (SELECT ssbsect_term_code AS term_code,
+                          ssbsect_crn AS crs_crn,
+                          ssbsect_subj_code AS crs_subj_code,
+                          ssbsect_crse_numb AS crs_num,
+                          ssbsect_seq_numb AS ssbsect_section,
+                          ssbsect_schd_code AS schd_code,
+                          scbcrse_credit_hr_low AS credit_hours,
+                          scbcrse_lec_hr_low AS lecture_hours,
+                          scbcrse_lab_hr_low AS lab_hours,
+                          scbcrse_oth_hr_low AS other_hours,
+                          CASE
+                             WHEN ssbsect_schd_code IN ('LEC', 'LEX') AND scbcrse_lec_hr_low IS NULL THEN ssbsect_schd_code || ' courses should only have Lecture Hours in Banner'
+                             WHEN ssbsect_schd_code = 'LAB' AND scbcrse_lab_hr_low IS NULL THEN ssbsect_schd_code || ' courses should only have Lab Hours in Banner'
+                             WHEN ssbsect_schd_code = 'LAB' AND scbcrse_credit_hr_low != 0.000 THEN ssbsect_schd_code || ' courses should only have zero credits'
+                             WHEN ssbsect_schd_code = 'LBC' AND scbcrse_lab_hr_low IS NULL THEN ssbsect_schd_code || ' should only have Lab Hours in banner '
+                             WHEN ssbsect_schd_code = 'LBC' AND scbcrse_credit_hr_low = 0.000 THEN ssbsect_schd_code || ' should have credit hours'
+                             WHEN ssbsect_schd_code = 'LEL' AND (scbcrse_lec_hr_low IS NULL OR scbcrse_lab_hr_low IS NULL) THEN ssbsect_schd_code || ' should have Lab Hours and Lecture Hours in Banner and have credit hours'
+                             WHEN ssbsect_schd_code NOT IN ('LEC', 'LEX', 'LEL') AND scbcrse_lec_hr_low > 1 THEN ssbsect_schd_code || ' is not a lecture course, but has lecture hours'
+                             WHEN ssbsect_schd_code NOT IN ('LAB', 'LBC', 'LEL') AND scbcrse_lab_hr_low > 1 THEN ssbsect_schd_code || ' is not a lab course, but has lab hours'
+                             END AS error_reason,
+                          CASE
+                             WHEN ssbsect_schd_code IN ('LEC', 'LEX') AND scbcrse_lec_hr_low IS NULL THEN '1'
+                             WHEN ssbsect_schd_code = 'LAB' AND scbcrse_lab_hr_low IS NULL THEN '1'
+                             WHEN ssbsect_schd_code = 'LAB' AND scbcrse_credit_hr_low != 0.000 THEN '1'
+                             WHEN ssbsect_schd_code = 'LBC' AND scbcrse_lab_hr_low IS NULL THEN '1'
+                             WHEN ssbsect_schd_code = 'LBC' AND scbcrse_credit_hr_low = 0.000 THEN '1'
+                             WHEN ssbsect_schd_code = 'LEL' AND (scbcrse_lec_hr_low IS NULL OR scbcrse_lab_hr_low IS NULL) THEN '1'
+                             WHEN ssbsect_schd_code NOT IN ('LEC', 'LEX', 'LEL') AND scbcrse_lec_hr_low > 1 THEN '1'
+                             WHEN ssbsect_schd_code NOT IN ('LAB', 'LBC', 'LEL') AND scbcrse_lab_hr_low > 1 THEN '1'
+                             END AS is_error_flag
+                     FROM saturn.ssbsect a
+                          LEFT JOIN saturn.scbcrse d
+                          ON d.scbcrse_subj_code = a.ssbsect_subj_code AND d.scbcrse_crse_numb = a.ssbsect_crse_numb AND
+                             d.scbcrse_eff_term = (SELECT MAX(scbcrse_eff_term)
+                                                     FROM scbcrse d1
+                                                    WHERE d1.scbcrse_subj_code = d.scbcrse_subj_code
+                                                      AND d1.scbcrse_crse_numb = d.scbcrse_crse_numb)
+                    WHERE a.ssbsect_subj_code != 'CED'
+                      AND a.ssbsect_term_code = '202120'
+                      AND a.ssbsect_ssts_code = 'A'
+                      AND a.ssbsect_enrl != 0)
+               WHERE is_error_flag = '1';
+
+
  /* Tab/Num: [ EOT Only ][ 1 ]
   * Action:  Send results to Julie Stender   
   * Notes:   was their EA changed for a valid reason during enrollment at 3rd week
   */
   
-    SELECT COUNT(DISTINCT(pidm)) AS eot_only_table_1_errors
- -- SELECT x.* 
+--    SELECT COUNT(DISTINCT(pidm)) AS eot_only_table_1_errors
+ SELECT x.*
     FROM   (
              SELECT d.pidm         AS pidm,   
                     d.ID           AS banner_id,
                     f_format_name(spriden_pidm,'LFMI')                 
                                    AS full_name,
                     cur_prgm1      AS curr_prgm, 
-                    s_entry_action AS ea_3rd, 
+                    s_entry_action AS ea_3rd,
+                    d.reg_type     AS s_entry_action_eot,
                     s.styp         AS stu_type_3rd, 
                     d.styp         AS stu_type_eot,  
                     d.cur_prgm     AS curr_prgm_eot,
@@ -1499,7 +1426,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     )              AS xfer_credits,
                     'Check Entry Action Change' 
                                    AS reason
-             FROM   students_202043 s, -- update each term
+             FROM   students_202123 s, -- update each term
                     dailystats d,
                     spriden
              WHERE  d.pidm = s.pidm
@@ -1516,7 +1443,8 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     f_format_name(spriden_pidm,'LFMI')                 
                                    AS full_name,
                     cur_prgm1      AS curr_prgm, 
-                    s_entry_action AS ea_3rd, 
+                    s_entry_action AS ea_3rd,
+                    d.reg_type     AS s_entry_action_eot,
                     s.styp         AS stu_type_3rd, 
                     d.styp         AS stu_type_eot,  
                     d.cur_prgm     AS curr_prgm_eot,
@@ -1535,7 +1463,7 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
                     )              AS xfer_credits,
                     'Check Entry Action Change' 
                                    AS reason
-             FROM   students_202043 s, -- update each term
+             FROM   students_202123 s, -- update each term
                     dailystats d,
                     spriden
              WHERE  d.pidm  = s.pidm
