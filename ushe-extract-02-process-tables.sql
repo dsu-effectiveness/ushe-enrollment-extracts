@@ -1,20 +1,13 @@
-/*
---DROP   TABLE extract_parameters;
-  CREATE TABLE extract_parameters
-  (
-    p_dsc_term_code VARCHAR2(6),
-    p_banner_term   NUMBER(6),
-    p_acyr          VARCHAR2(4),
-    p_year          NUMBER(4),
-    p_term          VARCHAR2(1),
-    p_extract       VARCHAR2(1)
-  );
-  
-  INSERT INTO extract_parameters VALUES ('202123','202120','2021','2021','3','3');
-*/
+TRUNCATE TABLE extract_parameters;
 
-select *
-   from extract_parameters;
+INSERT INTO extract_parameters VALUES ('20212E','202120','2021','2021','E','E');
+
+COMMIT;
+
+SELECT * FROM extract_parameters;
+
+
+
 
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
@@ -1692,4 +1685,16 @@ COMMIT;
 
 
 /* Manual Fixes */
+/* These needs to be updated to FH
+
+ */
+
+
+SELECT s_entry_action FROM students03 WHERE dsc_pidm IN ('272765',
+'317856',
+'330542',
+'291302',
+'319058',
+'335106',
+'318330')
 
