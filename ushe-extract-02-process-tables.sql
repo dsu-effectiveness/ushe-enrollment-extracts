@@ -1,6 +1,7 @@
 TRUNCATE TABLE extract_parameters;
 
-INSERT INTO extract_parameters VALUES ('20212E','202120','2021','2021','E','E');
+/* dsc_term_code, banner_term, acyr, year, p_term, extract */
+INSERT INTO extract_parameters VALUES ('20212E','202120','2021','2021','3','E');
 
 COMMIT;
 
@@ -532,7 +533,7 @@ SELECT * FROM extract_parameters;
                      AND    LENGTH(goradid_additional_id) BETWEEN 7 AND 9
                      AND    goradid_additional_id NOT LIKE '%*%'
                      AND    goradid_additional_id NOT LIKE '%.%'
-                     AND    substr(substr(goradid_additional_id,-7),1,1) BETWEEN 1 AND 2
+                     AND    substr(substr(goradid_additional_id,-7),1,1) IN ('1', '2')
                    )
                 -- Students can have more than one SSID, so use activity date to get the most recent one.
                    SELECT inner_pidm, s_ssid
@@ -1078,7 +1079,6 @@ SELECT * FROM extract_parameters;
         )
 
  COMMIT;
-
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------       
@@ -1688,13 +1688,4 @@ COMMIT;
 /* These needs to be updated to FH
 
  */
-
-
-SELECT s_entry_action FROM students03 WHERE dsc_pidm IN ('272765',
-'317856',
-'330542',
-'291302',
-'319058',
-'335106',
-'318330')
 

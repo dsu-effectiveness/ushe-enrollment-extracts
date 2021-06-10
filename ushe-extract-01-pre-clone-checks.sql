@@ -1337,17 +1337,17 @@ SELECT COUNT(DISTINCT(crn)) AS classes_table_8_errors
   */
 
  SELECT COUNT(DISTINCT(crs_crn)) AS classes_8_errors
-    SELECT term_code,
-           crs_crn,
-           crs_subj_code,
-           crs_num,
-           ssbsect_section,
-           schd_code,
-           credit_hours,
-           lecture_hours,
-           lab_hours,
-           other_hours,
-           error_reason
+--     SELECT term_code,
+--            crs_crn,
+--            crs_subj_code,
+--            crs_num,
+--            ssbsect_section,
+--            schd_code,
+--            credit_hours,
+--            lecture_hours,
+--            lab_hours,
+--            other_hours,
+--            error_reason
     FROM
                   (SELECT ssbsect_term_code AS term_code,
                           ssbsect_crn AS crs_crn,

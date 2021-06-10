@@ -362,7 +362,7 @@ UNION
 --Added s_citz_code and not in statement to where clause on 9/24/2020 by tgroskreutz
                                            
 SELECT 'S-08b' AS label, count(*) AS err_count
---SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code)
+--SELECT s_inst, s_banner_id, s_last_name, s_first_name, s_gender, s_cur_zip_code, s_citz_code, LENGTH(s_cur_zip_code) AS zip_char_length
 	FROM students_current
 	WHERE (LENGTH(s_cur_zip_code) < 5 or s_cur_zip_code like '%[a-z]%' or s_cur_zip_code in ('00000','11111'))
 	and s_citz_code <> '1'
@@ -1095,7 +1095,7 @@ UNION
 -- Budget Codes - Ensure that there are budget codes for all course files.
 
        SELECT 'C-11' AS label, count(*) AS err_count
-          /* SELECT c_banner_term, c_crn, c_crs_subject, c_crs_number, c_crs_section, c_schd_code, nvl(c_budget_code,'NULL'), c_enrl,
+          /* SELECT c_banner_term, c_crn, c_crs_subject, c_crs_number, c_crs_section, c_schd_code, nvl(c_budget_code,'NULL') AS budget_code, c_enrl,
                     'Missing Budget Code' AS reason /**/
          FROM   courses_current
         WHERE  c_budget_code NOT IN ('BA','BC','BU','BV','BY','SD','SF','SM','SP','SQ')
@@ -1504,7 +1504,28 @@ UNION
     SELECT 'DSU-Internal Check: No Graduate GPA' AS label, count(*) AS err_count
    --SELECT s_pidm, s_banner_id, s_last_name, s_first_name, s_cum_gpa_grad, s_entry_action, s_banner_term
    FROM ENROLL.students_current
-   WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG');
+   WHERE s_cum_gpa_grad = 0 AND s_entry_action IN ('CG', 'RG')
+
+UNION
+
+/* Credits outside of min max range */
+SELECT 'DSU-Internal Check: Credits outside of min max range' AS label, count(*) AS err_count
+--SELECT s_pidm, s_banner_id, s_last_name, s_first_name, b.c_max_credit, c_min_credit, a.sc_earned_cr, sc_att_cr
+FROM ENROLL.student_courses_current a
+LEFT JOIN courses_current b ON b.c_crn = a.sc_crn
+LEFT JOIN students_current c ON c.s_banner_id = a.sc_banner_id
+WHERE sc_earned_cr NOT BETWEEN c_min_credit AND c_max_credit
+AND sc_earned_cr > 0
+
+UNION
+
+SELECT 'DSU-Internal Check: Credits outside of min max range' AS label, count(*) AS err_count
+--SELECT s_pidm, s_banner_id, s_last_name, s_first_name, b.c_max_credit, c_min_credit, a.sc_earned_cr, sc_att_cr
+FROM ENROLL.student_courses_current a
+LEFT JOIN courses_current b ON b.c_crn = a.sc_crn
+LEFT JOIN students_current c ON c.s_banner_id = a.sc_banner_id
+WHERE sc_att_cr NOT BETWEEN c_min_credit AND c_max_credit
+AND sc_att_cr > 0;
 
 COMMIT;
 
