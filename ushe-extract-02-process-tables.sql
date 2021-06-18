@@ -9,12 +9,12 @@ SELECT * FROM extract_parameters;
 
 
 
-
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
 
  TRUNCATE TABLE students_current;
+
 
  INSERT INTO students_current
  SELECT      DISTINCT
@@ -1081,10 +1081,10 @@ SELECT * FROM extract_parameters;
  COMMIT;
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
- ------------------------------------------------------------------------------------------------------------       
+ ------------------------------------------------------------------------------------------------------------
 
 
- TRUNCATE TABLE courses_current;       
+ TRUNCATE TABLE courses_current;
  INSERT INTO courses_current
  SELECT      c_crn,
              c_banner_term,
@@ -1152,7 +1152,7 @@ SELECT * FROM extract_parameters;
  FROM   (
           WITH courses AS
           (
-            SELECT DISTINCT 
+            SELECT DISTINCT
                    p_dsc_term_code   AS c_banner_extract,
                    p_banner_term     AS c_banner_term,
                    p_year            AS c_year,
@@ -1166,10 +1166,10 @@ SELECT * FROM extract_parameters;
                    spriden_id        AS c_instr_id,
                    dsc.f_get_name(spriden_pidm)
                                      AS c_instr_name,
-                   CASE WHEN ssbsect_insm_code = 'E'   THEN 'H' 
+                   CASE WHEN ssbsect_insm_code = 'E'   THEN 'H'
                         WHEN ssbsect_insm_code IS NULL THEN 'P'
                         ELSE ssbsect_insm_code
-                        END  AS c_delivery_method,  
+                        END  AS c_delivery_method,
                    ssbsect_schd_code AS dsc_schd_code,
                    CASE WHEN subj_code = 'CED' -- When The course is a Community Education Course ...
                         THEN 'SD'              -- ... then Budget Code SD
@@ -1178,9 +1178,9 @@ SELECT * FROM extract_parameters;
                    CASE WHEN subj_code = 'CED' -- When the course is a Community Education Course...
                         THEN 'N'               -- ... Then Indicate it's a non-credit course
                         ELSE 'C'               -- ... Else Indicate it's a credit course
-                        END          AS c_credit_ind                  
-        -- SELECT * 
-           FROM   extract_parameters, 
+                        END          AS c_credit_ind
+        -- SELECT *
+           FROM   extract_parameters,
                   as_catalog_schedule,
                   ssbsect,
                   gtvinsm,
@@ -1261,7 +1261,7 @@ SELECT * FROM extract_parameters;
                  courses.dsc_schd_code AS c_schd_code,
                  courses.c_delivery_method,
                  supp.c_dsc_fye,
-                 CASE WHEN courses.c_delivery_method = 'E' THEN 'E' END AS c_del_model, 
+                 CASE WHEN courses.c_delivery_method = 'E' THEN 'E' END AS c_del_model,
                  gned.c_gen_ed,
                  ascs.c_site_type,
                  CASE WHEN dsc_schd_code IN ('PRA','INT', 'CLN','OTH','SUP')
@@ -1314,7 +1314,7 @@ SELECT * FROM extract_parameters;
                            THEN 'V' -- mark the course V for Vocational
                       WHEN supp.program_type = 'V' -- The Program Type is Vocational
                        AND ascs.c_title NOT LIKE '%Work Exp%'  -- exclude work experience courses
-                       AND NOT EXISTS 
+                       AND NOT EXISTS
                            ( -- Course is NOT in the Voccational Courses (VOCCRS) Table
                              SELECT 'Y'
                              FROM   voccrs_current
@@ -1338,77 +1338,77 @@ SELECT * FROM extract_parameters;
                                ELSE credit_hours_low * 10 -- ... else return credit hrs w/ implied decimal.
                                END                             AS c_min_credit,
                           CASE WHEN c_credit_ind = 'N'    -- ... Same as Credit Hours Low
-                               THEN 0                  
-                               ELSE nvl(credit_hours_high, credit_hours_low) * 10 
+                               THEN 0
+                               ELSE nvl(credit_hours_high, credit_hours_low) * 10
                                END                             AS c_max_credit,
                           CASE WHEN c_credit_ind = 'N'    -- ... Same as Credit Hours Low
-                               THEN nvl(credit_hours_high, credit_hours_low) * 10                   
+                               THEN nvl(credit_hours_high, credit_hours_low) * 10
                                ELSE 0
                                END                             AS c_contact_hrs,
                           begin_time1                          AS c_start_time1,
                           end_time1                            AS c_stop_time1,
-                             decode(monday_ind1,    NULL, ' ', monday_ind1   )    
-                          || decode(tuesday_ind1,   NULL, ' ', tuesday_ind1  )   
-                          || decode(wednesday_ind1, NULL, ' ', wednesday_ind1) 
-                          || decode(thursday_ind1,  NULL, ' ', thursday_ind1 )  
-                          || decode(friday_ind1,    NULL, ' ', friday_ind1   )     
-                          || decode(saturday_ind1,  NULL, ' ', saturday_ind1 )  
+                             decode(monday_ind1,    NULL, ' ', monday_ind1   )
+                          || decode(tuesday_ind1,   NULL, ' ', tuesday_ind1  )
+                          || decode(wednesday_ind1, NULL, ' ', wednesday_ind1)
+                          || decode(thursday_ind1,  NULL, ' ', thursday_ind1 )
+                          || decode(friday_ind1,    NULL, ' ', friday_ind1   )
+                          || decode(saturday_ind1,  NULL, ' ', saturday_ind1 )
                           || decode(sunday_ind1,    NULL, ' ', sunday_ind1   )
                                                                AS c_days1,
                           bldg_code1                           AS c_bldg1,
-                          ( SELECT DISTINCT b_number 
+                          ( SELECT DISTINCT b_number
                             FROM   space_util_bldg_current
-                            WHERE  b_sname = bldg_code1 
+                            WHERE  b_sname = bldg_code1
                           )                                    AS c_bldg_num1,
                           substr(room_code1, 1, 4)             AS c_room1,
                           ( SELECT DISTINCT r_occupancy
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code1
                             AND    r_number = substr(room_code1, 1, 4)
-                          )                                    AS c_room_max1,  
+                          )                                    AS c_room_max1,
                           ( SELECT DISTINCT r_use_code
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code1
                             AND    r_number = substr(room_code1, 1, 4)
-                          )                                    AS c_room_type1,  
+                          )                                    AS c_room_type1,
                           begin_time2                          AS c_start_time2,
                           end_time2                            AS c_stop_time2,
-                             decode(monday_ind2,    NULL, ' ', monday_ind2   )    
-                          || decode(tuesday_ind2,   NULL, ' ', tuesday_ind2  )   
-                          || decode(wednesday_ind2, NULL, ' ', wednesday_ind2) 
-                          || decode(thursday_ind2,  NULL, ' ', thursday_ind2 )  
-                          || decode(friday_ind2,    NULL, ' ', friday_ind2   )     
-                          || decode(saturday_ind2,  NULL, ' ', saturday_ind2 )  
+                             decode(monday_ind2,    NULL, ' ', monday_ind2   )
+                          || decode(tuesday_ind2,   NULL, ' ', tuesday_ind2  )
+                          || decode(wednesday_ind2, NULL, ' ', wednesday_ind2)
+                          || decode(thursday_ind2,  NULL, ' ', thursday_ind2 )
+                          || decode(friday_ind2,    NULL, ' ', friday_ind2   )
+                          || decode(saturday_ind2,  NULL, ' ', saturday_ind2 )
                           || decode(sunday_ind2,    NULL, ' ', sunday_ind2   )
                                                                AS c_days2,
                           bldg_code2                           AS c_bldg2,
-                          ( SELECT DISTINCT b_number 
+                          ( SELECT DISTINCT b_number
                             FROM   space_util_bldg_current
-                            WHERE  b_sname = bldg_code2 
+                            WHERE  b_sname = bldg_code2
                           )                                    AS c_bldg_num2,
                           substr(room_code2, 1, 4)             AS c_room2,
                           ( SELECT DISTINCT r_occupancy
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code2
                             AND    r_number = substr(room_code2, 1, 4)
-                          )                                    AS c_room_max2,  
+                          )                                    AS c_room_max2,
                           ( SELECT DISTINCT r_use_code
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code2
                             AND    r_number = substr(room_code2, 1, 4)
-                          )                                    AS c_room_type2,  
+                          )                                    AS c_room_type2,
                           begin_time3                          AS c_start_time3,
                           end_time3                            AS c_stop_time3,
-                             decode(monday_ind3,    NULL, ' ', monday_ind3   )    
-                          || decode(tuesday_ind3,   NULL, ' ', tuesday_ind3  )   
-                          || decode(wednesday_ind3, NULL, ' ', wednesday_ind3) 
-                          || decode(thursday_ind3,  NULL, ' ', thursday_ind3 )  
-                          || decode(friday_ind3,    NULL, ' ', friday_ind3   )    
-                          || decode(saturday_ind3,  NULL, ' ', saturday_ind3 )  
-                          || decode(sunday_ind3,    NULL, ' ', sunday_ind3   ) 
+                             decode(monday_ind3,    NULL, ' ', monday_ind3   )
+                          || decode(tuesday_ind3,   NULL, ' ', tuesday_ind3  )
+                          || decode(wednesday_ind3, NULL, ' ', wednesday_ind3)
+                          || decode(thursday_ind3,  NULL, ' ', thursday_ind3 )
+                          || decode(friday_ind3,    NULL, ' ', friday_ind3   )
+                          || decode(saturday_ind3,  NULL, ' ', saturday_ind3 )
+                          || decode(sunday_ind3,    NULL, ' ', sunday_ind3   )
                                                                AS c_days3,
                           bldg_code3                           AS c_bldg3,
-                          ( SELECT DISTINCT b_number 
+                          ( SELECT DISTINCT b_number
                             FROM   space_util_bldg_current
                             WHERE  b_sname = bldg_code3
                           )                                    AS c_bldg_num3,
@@ -1417,12 +1417,12 @@ SELECT * FROM extract_parameters;
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code3
                             AND    r_number = substr(room_code3, 1, 4)
-                          )                                    AS c_room_max3,  
+                          )                                    AS c_room_max3,
                           ( SELECT DISTINCT r_use_code
                             FROM   space_util_room_current
                             WHERE  r_abbrev = bldg_code3
                             AND    r_number = substr(room_code3, 1, 4)
-                          )                                    AS c_room_type3,  
+                          )                                    AS c_room_type3,
                           to_char(ptrm_start_date, 'YYYYMMDD') AS c_start_date,
                           to_char(ptrm_end_date, 'YYYYMMDD')   AS c_end_date,
                           title                                AS c_title,
@@ -1437,7 +1437,7 @@ SELECT * FROM extract_parameters;
                    FROM   courses,
                           as_catalog_schedule
                    WHERE  crn_key = c_crn
-                   AND    term_code_key = c_banner_term 
+                   AND    term_code_key = c_banner_term
                  ) ascs,
 
                  (  -- Calculated using SFRSTCR and STVRSTS
@@ -1450,14 +1450,14 @@ SELECT * FROM extract_parameters;
                    AND    stvrsts_incl_sect_enrl = 'Y'
                    GROUP  BY sfrstcr_crn
                  ) enrl,
-                 (                 
+                 (
                    SELECT inner_crn,
                           CASE WHEN gened_gc = 1 THEN 'DV' -- Map GC to DV
                                WHEN gened_en = 1 THEN 'C'  -- Map EN to C  for certain courses
                                WHEN gened_ma = 1 THEN 'QL' -- Map MA to QL
                                WHEN gened_ai = 1 THEN 'AI' -- Map AI to AI for certain classes
                                WHEN gened_cp = 1 THEN 'CL' -- Map CP to CL
-                               WHEN gened_il = 1 THEN 'IR' -- Map IL to IR                                  
+                               WHEN gened_il = 1 THEN 'IR' -- Map IL to IR
                                WHEN gened_fa = 1 THEN 'FA' -- Map FA to itself
                                WHEN gened_ss = 1 THEN 'SS' -- Map SS to itself
                                WHEN gened_ls = 1 THEN 'LS' -- Map LS to itself
@@ -1465,15 +1465,15 @@ SELECT * FROM extract_parameters;
                                WHEN gened_hu = 1 THEN 'HU' -- Map HU to itself
                                WHEN gened_fl = 1 THEN 'FL' -- Map FL to itself
                                END AS c_gen_ed
-                   FROM   (                   
+                   FROM   (
                             SELECT c_crn AS inner_crn,
                                    sum(CASE WHEN ssrattr_attr_code = 'GC' THEN 1 ELSE 0 END) AS gened_gc,
-                                   sum(CASE WHEN ssrattr_attr_code = 'EN' 
+                                   sum(CASE WHEN ssrattr_attr_code = 'EN'
                                              AND c_crs_subject = 'ENGL'
                                              AND c_crs_number IN ('1010','2010','1010D')
                                             THEN 1 ELSE 0 END)                               AS gened_en,
                                    sum(CASE WHEN ssrattr_attr_code = 'MA' THEN 1 ELSE 0 END) AS gened_ma,
-                                   sum(CASE WHEN ssrattr_attr_code = 'AI' 
+                                   sum(CASE WHEN ssrattr_attr_code = 'AI'
                                              AND (  (c_crs_subject = 'ECON' AND c_crs_number = '1740')
                                                  OR (c_crs_subject = 'POLS' AND c_crs_number = '1100')
                                                  OR (c_crs_subject = 'HIST' AND c_crs_number = '1700'))
@@ -1493,15 +1493,15 @@ SELECT * FROM extract_parameters;
                           )
                  ) gned,
                  (
-                   SELECT c_crn             AS inner_crn, 
+                   SELECT c_crn             AS inner_crn,
                           scbsupp_occs_code AS program_type,
-                          CASE WHEN c_budget_code NOT IN ('SF','BC') 
-                                AND scbsupp_ccsl_code = 'FY' 
+                          CASE WHEN c_budget_code NOT IN ('SF','BC')
+                                AND scbsupp_ccsl_code = 'FY'
                                     THEN 'FYE'
-                               WHEN ssbsect_crse_title LIKE '%First Year%' 
-                                 OR ssbsect_crse_title LIKE '%FYE%' 
+                               WHEN ssbsect_crse_title LIKE '%First Year%'
+                                 OR ssbsect_crse_title LIKE '%FYE%'
                                     THEN 'FYE'
-                               END          AS c_dsc_fye 
+                               END          AS c_dsc_fye
                    FROM   courses, ssbsect, scbsupp s1
                    WHERE  scbsupp_subj_code = c_crs_subject
                    AND    scbsupp_crse_numb = c_crs_number
@@ -1530,14 +1530,14 @@ SELECT * FROM extract_parameters;
           AND    courses.c_crn = xlst.inner_crn (+)
           AND    c_enrl > 0
         )
- 
+
  COMMIT;
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
  ------------------------------------------------------------------------------------------------------------
 
  TRUNCATE TABLE student_courses_current;
- INSERT INTO student_courses_current 
+ INSERT INTO student_courses_current
  SELECT      sc_pidm,
              sc_id,
              sc_banner_id,
@@ -1586,10 +1586,10 @@ SELECT * FROM extract_parameters;
                     s_xtrct_mltplr    AS sc_xtrct_mltplr,
                     c_credit_ind      AS sc_credit_ind,
                     s_cur_prgm1       AS sc_prgm_code,
-                    CASE WHEN c_credit_ind = 'N' THEN 0 
+                    CASE WHEN c_credit_ind = 'N' THEN 0
                          ELSE sfrstcr_credit_hr * 10 -- * s_xtrct_mltplr
                          END          AS sc_att_cr, -- Zeros data points during 3rd week
-                    CASE WHEN c_credit_ind = 'N' THEN 0 
+                    CASE WHEN c_credit_ind = 'N' THEN 0
                          ELSE 1 END   AS sc_crdt_mltplr -- Zeros non-credit data points
              FROM   students_current,
                     courses_current,
@@ -1598,7 +1598,7 @@ SELECT * FROM extract_parameters;
              WHERE  sfrstcr_pidm           = s_pidm        -- Join SFRSTCR to the Students Table
              AND    sfrstcr_crn            = c_crn         -- Join SFRSTCR to the Courses  Table
              AND    sfrstcr_term_code      = s_banner_term -- Limit Data to Term
-             AND    sfrstcr_rsts_code      = stvrsts_code  -- Join SFRSTCR to STVRSTS 
+             AND    sfrstcr_rsts_code      = stvrsts_code  -- Join SFRSTCR to STVRSTS
              AND    stvrsts_incl_sect_enrl = 'Y'           -- Only include rsts codes considered enrolled
            )
            SELECT student_courses.sc_pidm,
@@ -1624,46 +1624,46 @@ SELECT * FROM extract_parameters;
                        -- check for summer term, default to ec when summer
                             THEN CASE WHEN sc_high_school IN ('459500','459600','459998','969999','459150','459300','459200')
                                            THEN 'EC' -- Home School students are considered EC HSCE
-                                      WHEN sc_prgm_code = 'ND-SA' 
+                                      WHEN sc_prgm_code = 'ND-SA'
                                        AND sc_budget_code NOT IN ('BC','SF')
                                            THEN 'DC' -- Paid for by Success Academy
                                       WHEN sc_crs_sbj||sc_crs_num IN ( SELECT subj||crse FROM voccrs_current )
                                        AND sc_budget_code IN ('BC','SF')
                                            THEN 'CC' -- Paid in full with HSCE Enrollment funds
-                                      WHEN sc_budget_code IN ('BC','SF') 
+                                      WHEN sc_budget_code IN ('BC','SF')
                                            THEN 'DC' -- Patrially paid with HSCE funds
-                                           ELSE 'EC' -- Students are paying full price. 
-                               END 
+                                           ELSE 'EC' -- Students are paying full price.
+                               END
                        END  AS sc_stud_type,
                   CASE WHEN sc_delivery_method = 'R'
-                        AND sc_crs_sec LIKE '%M%' 
+                        AND sc_crs_sec LIKE '%M%'
                         AND sc_site_type IN ('B80','C08')
                             THEN 'A01'
-                       WHEN sc_delivery_method = 'R' 
+                       WHEN sc_delivery_method = 'R'
                         AND sc_crs_sec LIKE '%H%'
                         AND sc_site_type IN ('A01','C08')
                             THEN 'B80'
                        WHEN sc_delivery_method = 'R'
-                        AND sc_crs_sec LIKE '%K%' 
+                        AND sc_crs_sec LIKE '%K%'
                         AND sc_site_type IN ('A01','B80')
-                            THEN 'C08' 
+                            THEN 'C08'
                        END  AS dsc_loc_recvd,
                   student_courses.sc_gmod_code
            FROM   student_courses,
                   (
                     SELECT sc_pidm   AS inner_pidm,
                            sc_crn    AS inner_crn,
-                           CASE WHEN sc_ptrm_code = 'Y' OR sc_credit_ind = 'N' 
+                           CASE WHEN sc_ptrm_code = 'Y' OR sc_credit_ind = 'N'
                                      THEN 0
                                 WHEN swvgrde_final_grade IN ('A','A-','B+','B','B-','C+','C','C-','D+','D','D-','CR','SP','P','L','NG','T')
-                                     THEN swvgrde_earned_hours * 10 * sc_xtrct_mltplr * sc_crdt_mltplr 
-                                     ELSE 0 
+                                     THEN swvgrde_earned_hours * 10 * sc_xtrct_mltplr * sc_crdt_mltplr
+                                     ELSE 0
                                 END AS sc_earned_cr,
-                           CASE WHEN sc_credit_ind = 'N' 
+                           CASE WHEN sc_credit_ind = 'N'
                                      THEN swvgrde_earned_hours * 10
-                                     ELSE 0  
+                                     ELSE 0
                                 END  AS sc_contact_hrs,
-                           CASE WHEN sc_extract = '3' OR sc_credit_ind = 'N' 
+                           CASE WHEN sc_extract = '3' OR sc_credit_ind = 'N'
                                      THEN NULL
                                 WHEN sc_extract = 'E' AND sc_ptrm_code = 'Y' -- needs more logic
                                      THEN 'IP'
@@ -1686,6 +1686,64 @@ COMMIT;
 
 /* Manual Fixes */
 /* These needs to be updated to FH
+/* Manual Fixes */
 
- */
+UPDATE students_current
+SET s_entry_action = 'RS'
+WHERE s_id = '566659884';
+
+UPDATE students_current
+SET s_high_school = '459200'
+ WHERE s_banner_id IN ('D00358599',
+'D00369879',
+'D00379358',
+'D00393932',
+'D00395896',
+'D00402615',
+'D00410332',
+'D00413538',
+'D00415590',
+'D00421869',
+'D00438574');
+
+UPDATE students_current
+   SET s_entry_action = 'RS'
+WHERE s_banner_id IN ('D00152723', 'D00289126');
+
+UPDATE students_current
+   SET s_entry_action = 'FF'
+WHERE s_banner_id IN ('D00208224', 'D00434764');
+
+UPDATE students_current
+   SET s_entry_action = 'RG'
+WHERE s_banner_id IN ('D00291647');
+
+UPDATE students_current
+   SET s_entry_action = 'NM'
+WHERE s_banner_id IN ('D00298515', 'D00417305');
+
+UPDATE students_current
+   SET s_entry_action = 'FH'
+WHERE s_banner_id IN ('D00411228',
+                     'D00420582',
+                      'D00422023',
+                      'D00422687',
+                      'D00426041',
+                      'D00429938',
+                      'D00446138',
+                      'D00453002'
+);
+
+UPDATE students_current
+   SET s_entry_action = 'TU'
+WHERE s_banner_id IN ('D00437010', 'D00439558', 'D00431459');
+
+UPDATE students_current
+   SET s_entry_action = 'TU'
+WHERE s_banner_id IN ('D00446138',
+'D00453002'
+);
+
+COMMIT;
+
 

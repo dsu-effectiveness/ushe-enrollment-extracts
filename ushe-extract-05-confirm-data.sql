@@ -83,7 +83,7 @@
              WHERE  s_entry_action IN ('FF','FH','HS')
            ) AS ssid_count,
            (
-             SELECT count(DISTINCT s_id)   AS "S-34" 
+             SELECT count(s_id)   AS "S-34"
              FROM   students_current 
              WHERE  s_entry_action IN ('FF','FH','HS')
            ) as ff_fh_hs_count
@@ -93,8 +93,8 @@
  -- USHE S-36 ---------------------------------------------------------------------------------------
 
     SELECT '3671' AS "S-36",
-           (SELECT count (distinct s_pidm) FROM students_current WHERE s_act_comp > 0) AS s_act,
-           (SELECT count (distinct s_pidm) FROM students_current) AS "total"
+           (SELECT count (distinct s_pidm) FROM students_current WHERE s_entry_action IN ('CS','FF','FH','RS','TU') AND s_act_comp > 0) AS s_act,
+           (SELECT count (distinct s_pidm) FROM students_current WHERE s_entry_action IN ('CS','FF','FH','RS','TU')) AS "total"
     FROM   DUAL;
     
     -- select s_term_gpa, s_cum_gpa_ugrad, students_current.* from students_current where s_term_gpa = s_cum_gpa_ugrad and s_term_earned_cr <> s_cum_hrs_ugrad and s_cum_gpa_ugrad not in (0, 4000) and s_entry_action NOT IN ('FF','FH','TU','TG') and s_level != 'FR';
@@ -126,10 +126,10 @@
  ----------------------------------------------------------------------------------------------------
  -- USHE SC-08e -------------------------------------------------------------------------------------
     
-    SELECT DISTINCT round(
+    SELECT DISTINCT
            ( SELECT sum(sc_earned_cr) 
              FROM student_courses_current)/10,0
-           ) AS "SC-08e"
+            AS "SC-08e"
     FROM student_courses_current;
     
  ----------------------------------------------------------------------------------------------------
@@ -146,7 +146,15 @@
  -- USHE C-38 ---------------------------------------------------------------------------------------
 
     SELECT c_room_type3, count(*) AS "C-38" FROM courses_current GROUP BY c_room_type3 /*ORDER BY c_room_type3 DESC*/;
-    
+
+ ----------------------------------------------------------------------------------------------------
+ -- USHE C-47A ---------------------------------------------------------------------------------------
+    SELECT
+    (SELECT count(*) AS total_count FROM courses_current WHERE c_gen_ed IS NOT NULL) AS Gen_Ed_Count,
+    (SELECT count(*) AS total_count FROM courses_current) AS total_count
+    FROM dual;
+
+
  ----------------------------------------------------------------------------------------------------
  -- USHE C-50 ---------------------------------------------------------------------------------------
     

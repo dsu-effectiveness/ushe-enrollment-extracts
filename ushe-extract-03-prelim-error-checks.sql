@@ -553,6 +553,7 @@ SELECT 'S-08b' AS label, count(*) AS err_count
           AND    lpad(s_cur_cip_ushe,'6','0') NOT IN (SELECT cip_code FROM cip2010)
 
 
+
         UNION
 
 -- S-17a -------------------------------------------------------------------------------------------
