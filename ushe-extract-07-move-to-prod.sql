@@ -1,20 +1,20 @@
-/* --- RUN IN PROD ----------------------------------------------------------------------------------------------------- */
-    DROP TABLE students_202123;
-    DROP TABLE course_202123;
-    DROP TABLE student_course_202123;
+/* --- RUN IN IR1/2 ----------------------------------------------------------------------------------------------------- */
+    DROP TABLE students_20212E;
+    DROP TABLE course_20212E;
+    DROP TABLE student_course_20212E;
     
-    CREATE TABLE students_202123      AS SELECT * FROM students_20192e;
-    CREATE TABLE course_202123         AS SELECT * FROM course_20192e;
-    CREATE TABLE student_course_202123 AS SELECT * FROM student_course_20192e;
-    ALTER TABLE course_202123 MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
+    CREATE TABLE students_20212E      AS SELECT * FROM students_20204E;
+    CREATE TABLE course_20212E         AS SELECT * FROM course_20204E;
+    CREATE TABLE student_course_20212E AS SELECT * FROM student_course_20204E;
+    ALTER TABLE course_20212E MODIFY (S11_WKLD_XLIST_GRP varchar2(15 char));
 
-    TRUNCATE TABLE students_202123;
-    TRUNCATE TABLE course_202123;
-    TRUNCATE TABLE student_course_202123;
+    TRUNCATE TABLE students_20212E;
+    TRUNCATE TABLE course_20212E;
+    TRUNCATE TABLE student_course_20212E;
 
     /* --- RUN IN IR1 or IR2 ------------------------------------------------------------------------------------------------------ */
 
-    INSERT INTO students_202123@proddb.dixie.edu
+    INSERT INTO students_20212E@proddb.dixie.edu
 
     SELECT s_pidm AS pidm,
            s_banner_id,
@@ -112,7 +112,7 @@
     FROM   students_current;
     COMMIT;
 
-    INSERT INTO course_202123@proddb.dixie.edu
+    INSERT INTO course_20212E@proddb.dixie.edu
     SELECT c_crn AS crn,
            c_banner_term AS TERM,
            c_inst,
@@ -192,7 +192,7 @@
     COMMIT;
     
 
-    INSERT INTO student_course_202123@proddb.dixie.edu
+    INSERT INTO student_course_20212E@proddb.dixie.edu
     SELECT sc_pidm AS pidm,
            sc_id AS ID,
            sc_banner_term AS TERM,
@@ -226,8 +226,8 @@
     */
     
 
---    select * from students_202123@proddb
---    select * from course_202123@proddb
---    select * from student_course_202123@proddb
+--    select * from students_20212E@proddb
+--    select * from course_20212E@proddb
+--    select * from student_course_20212E@proddb
 
     
