@@ -16,7 +16,7 @@
   BEGIN
   
   -- Manual Parameter: --------- --
-     v_dsu_extract := '20204E';
+     v_dsu_extract := '20212E';
      v_database    := 'proddb';
   -- --------------------------- --
 
@@ -43,7 +43,7 @@ END;
 /**/
 
  -- Create Temp Table for Students Data
-    CREATE TABLE ts202123 AS
+    CREATE TABLE ts20212E AS
                  SELECT s_inst, 
                         s_year, 
                         s_term, 
@@ -117,7 +117,7 @@ END;
                         cohort_block,
                         s_term_att_cr, 
                         s_term_earned_cr,
-                        '202123' AS dsc_term_code,
+                        '20212E' AS dsc_term_code,
                         cur_minor1, 
                         cur_minor2,
                         religion, 
@@ -133,10 +133,10 @@ END;
                         hsgpa,
                        (SELECT gorvisa_vtyp_code FROM gorvisa@proddb     WHERE gorvisa_pidm = pidm) AS vtyp_code,
                        (SELECT hsgpact_hsgpact   from dsc.hsgpact@proddb where hsgpact_pidm = pidm) AS index_score
-                 FROM   students_202123@proddb;
+                 FROM   students_20212E@proddb;
                            
  -- Create Temp Table for Courses Data
-    CREATE TABLE tc202123 AS
+    CREATE TABLE tc20212E AS
                  SELECT c_inst, 
                         c_year, 
                         c_term, 
@@ -181,7 +181,7 @@ END;
                         c_dest_site,
                         dsc_fye, 
                         enrl AS c_class_size,
-                        '202123' AS c_banner_extract,
+                        '20212E' AS c_banner_extract,
                         c_level,
                         s11_wkld,
                         '   ' AS s11_wkld_cat,
@@ -196,10 +196,10 @@ END;
                         c_bldg_num3,
                         c_room_max3,
                         c_room_type3
-                 FROM   course_202123@proddb;
+                 FROM   course_20212E@proddb;
 
  -- Create Temp Table for Student Courses Data 
-    CREATE TABLE tsc202123 AS
+    CREATE TABLE tsc20212E AS
                  SELECT sc_inst, 
                         sc_year, 
                         sc_term,
@@ -219,40 +219,40 @@ END;
                         sc.pidm AS dsc_pidm,
                         gmod, 
                         dsc_loc_recvd, 
-                        '202123' AS dsc_term_code,
+                        '20212E' AS dsc_term_code,
                         sc.term,
                         s_banner_id AS sc_banner_id,
                         c.c_level AS sc_level,
                         c.c_delivery_method AS sc_del_method
-                 FROM   student_course_202123@proddb sc,
-                        students_202123@proddb s,
-                        course_202123@proddb c
+                 FROM   student_course_20212E@proddb sc,
+                        students_20212E@proddb s,
+                        course_20212E@proddb c
                  WHERE  s.pidm = sc.pidm
                     AND  sc.crn = c.crn;
                     
  ------------------------------------------------------------------------------------------------------------
-    
+
     -- Purge any previously imported records, if they exists, to prevent duplicates.                 
-    DELETE FROM students03      WHERE dsc_term_code = '202123';
-    DELETE FROM courses         WHERE dsc_term_code = '202123';
-    DELETE FROM student_courses WHERE dsc_term_code = '202123';
+    DELETE FROM students03      WHERE dsc_term_code = '20212E';
+    DELETE FROM courses         WHERE dsc_term_code = '20212E';
+    DELETE FROM student_courses WHERE dsc_term_code = '20212E';
     
     -- Insert records from temp tables into the extract tables.
-    INSERT INTO students03      SELECT * FROM  ts202123;
-    INSERT INTO courses         SELECT * FROM  tc202123;
-    INSERT INTO student_courses SELECT * FROM tsc202123;
+    INSERT INTO students03      SELECT * FROM  ts20212E;
+    INSERT INTO courses         SELECT * FROM  tc20212E;
+    INSERT INTO student_courses SELECT * FROM tsc20212E;
 
 
     
     -- Verify Imported Data.
-    SELECT COUNT(*) FROM students03      WHERE dsc_term_code = '202123';
-    SELECT COUNT(*) FROM courses         WHERE dsc_term_code = '202123';
-    SELECT COUNT(*) FROM student_courses WHERE dsc_term_code = '202123';
+    SELECT COUNT(*) FROM students03      WHERE dsc_term_code = '20212E';
+    SELECT COUNT(*) FROM courses         WHERE dsc_term_code = '20212E';
+    SELECT COUNT(*) FROM student_courses WHERE dsc_term_code = '20212E';
 
     -- Delete temp tables.
-    DROP TABLE  ts202123;
-    DROP TABLE  tc202123;
-    DROP TABLE tsc202123;
+    DROP TABLE  ts20212E;
+    DROP TABLE  tc20212E;
+    DROP TABLE tsc20212E;
     
      COMMIT;
 
@@ -269,9 +269,9 @@ END;
  /* -- Use these to check and make sure the records imported properly
 
     -- Students
-       SELECT count(*), s_year, s_term, s_extract 
+       SELECT count(*), s_year, s_term, s_extract, dsc_term_code
        FROM   students03
-       GROUP  BY s_year, s_term, s_extract
+       GROUP  BY s_year, s_term, s_extract, dsc_term_code
        ORDER  BY s_year DESC, s_term DESC, s_extract DESC;
 
     -- Courses
@@ -281,7 +281,7 @@ END;
        ORDER  BY c_year DESC, c_term DESC, c_extract DESC;
  
     -- Student Courses
-       SELECT count(*), sc_year, sc_term, sc_extract 
+       SELECT count(*), sc_year, sc_term, sc_extract
        FROM   student_courses
        GROUP  BY sc_year, sc_term, sc_extract
        ORDER  BY sc_year DESC, sc_term DESC, sc_extract DESC;
